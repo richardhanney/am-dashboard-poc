@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 238 36">
+  <title>Serenity Local</title>
+  <g fill="none" stroke="#e0cba7" stroke-width="2" stroke-linecap="round">
+    <circle cx="18" cy="18" r="14" />
+    <path d="M10 13h3m10 0h3M10 20q8 9 16 0" />
+  </g>
+  <text
+    x="42"
+    y="26"
+    fill="#ffffff"
+    font-family="Arial, sans-serif"
+    font-size="25"
+    font-weight="600"
+    letter-spacing="-.5"
+  >
+    Serenity Local
+  </text>
+</svg>
