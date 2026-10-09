@@ -534,6 +534,13 @@ export default function App() {
                         The mock dataset ends on 07 Oct 2026. Refresh updates the local timestamp
                         only. Layout preferences are the only data saved in this browser.
                       </Typography>
+                      <img
+                        className="help-easter-egg"
+                        src={`${import.meta.env.BASE_URL}help-easter-egg.gif`}
+                        alt="A playful office reaction"
+                        width={400}
+                        height={240}
+                      />
                     </>
                   ),
                 })

@@ -784,6 +784,14 @@ a:focus-visible {
 .drawer-content {
   padding: 24px;
 }
+.help-easter-egg {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  margin-top: 24px;
+  border-radius: 4px;
+}
 .layout-row {
   display: flex;
   align-items: center;
