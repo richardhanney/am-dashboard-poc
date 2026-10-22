@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useMemo, useState, type ReactNode } from 'react';
 import {
   Alert,
   Avatar,
@@ -77,6 +77,8 @@ import {
 } from './components';
 import { downloadCsv, type CsvRow } from './export';
 import CelebrateButton from './CelebrateButton';
+
+const TravellerFootprint = lazy(() => import('./TravellerFootprint'));
 
 const tabs = ['Overview', 'Users', 'Travel', 'Safety & Alerts', 'Integrations'];
 const defaultLayout = ['enabled', 'limit', 'engaged', 'mobile', 'trips'];
@@ -414,11 +416,6 @@ export default function App() {
     (i) => i.status === 'Warning',
   ).length;
   const recentColumns = [userColumns[0], userColumns[4], userColumns[5]];
-  const regionClick = (label: string) =>
-    showTrips(
-      data.trips.filter((t) => t.region === label),
-      `Travel in ${label}`,
-    );
   const destinationClick = (label: string) =>
     showTrips(
       data.trips.filter((t) => t.destination === label),
@@ -527,8 +524,8 @@ export default function App() {
                   content: (
                     <>
                       <Typography>
-                        100% fabricated data. No backend. No external service APIs or real customer
-                        data.
+                        100% fabricated dashboard data. No backend, customer/provider APIs or real
+                        customer data. The map uses bundled geography with no external map requests.
                       </Typography>
                       <Typography sx={{ mt: 2 }}>
                         The mock dataset ends on 07 Oct 2026. Refresh updates the local timestamp
@@ -757,27 +754,47 @@ export default function App() {
                   <MetricCard key={metric.id} metric={metric} />
                 ))}
               </div>
-              <div className="three-columns">
-                <Panel
-                  title="Top destinations"
-                  subtitle="Trips / itineraries by destination"
-                  action={
-                    <Button size="small" onClick={() => setTab(2)} endIcon={<ArrowForwardIcon />}>
-                      View travel
-                    </Button>
+              <div className="footprint-row">
+                <Suspense
+                  fallback={
+                    <Paper variant="outlined" sx={{ p: 3 }}>
+                      Loading traveller footprint…
+                    </Paper>
                   }
                 >
-                  <HorizontalBars data={data.destinations} onSelect={destinationClick} />
-                </Panel>
-                <Panel title="Travel by region" subtitle="Traveller footprint across regions">
-                  <HorizontalBars data={data.regions} onSelect={regionClick} />
-                </Panel>
-                <Panel
-                  title="Travel by destination risk"
-                  subtitle="Illustrative risk classifications"
-                >
-                  <Donut data={data.risks} total={data.trips.length} label="trips" risk />
-                </Panel>
+                  <TravellerFootprint
+                    key={prefix}
+                    data={data}
+                    range={range}
+                    onTravel={() => setTab(2)}
+                    onReceipts={(point, kind, scope) => {
+                      if (kind === 'trips')
+                        openRecords(
+                          `Trips to ${point.location}`,
+                          `${scope}. One mock itinerary per booking reference, counted by start date. Itinerary segments are not counted separately.`,
+                          point.trips,
+                          tripColumns,
+                          'map-travel',
+                        );
+                      else if (kind === 'checkins')
+                        openRecords(
+                          `Check-ins in ${point.location}`,
+                          `${scope}. Fictional check-in requests at this approximate city location. Each request is one record.`,
+                          point.checkins,
+                          checkColumns,
+                          'map-check-ins',
+                        );
+                      else
+                        openRecords(
+                          `SOS records in ${point.location}`,
+                          `${scope}. Fictional assistance records at this approximate city location. No emergency service is contacted.`,
+                          point.sos,
+                          sosColumns,
+                          'map-sos',
+                        );
+                    }}
+                  />
+                </Suspense>
               </div>
               <div className="insight-strip">
                 <span className="insight-icon">

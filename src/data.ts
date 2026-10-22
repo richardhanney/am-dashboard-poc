@@ -290,19 +290,31 @@ function makeCustomer(config: {
         ? ['Concur', 'Travelport', 'Amadeus']
         : ['Travelport', 'Concur'];
   const travelPool = users.slice(0, Math.floor((bands[0] + bands[1]) * 0.44));
+  const homeOrigin = id === 'northstar' ? 'Aberdeen' : id === 'globex' ? 'Amsterdam' : 'Manchester';
+  const weights =
+    id === 'northstar'
+      ? [7, 8, 9, 8, 9, 7, 4, 6, 13, 0, 2]
+      : id === 'globex'
+        ? [2, 2, 4, 1, 12, 10, 0, 6, 7, 11, 3]
+        : [0, 0, 1, 2, 3, 5, 4, 0, 10, 6, 7, 8, 11, 12, 13];
+  const originHubs = [...new Set(weights.map((index) => destinations[index].destination))];
   const trips: Trip[] = [];
   const generateTrips = (count: number, startAgo: number, span: number) => {
     for (let i = 0; i < count; i++) {
       const serial = trips.length;
       const ago = startAgo + Math.floor((i * span) / count);
       const u = travelPool[(i * 17 + Math.floor(i / travelPool.length)) % travelPool.length];
-      const weights =
-        id === 'northstar'
-          ? [7, 8, 9, 8, 9, 7, 4, 6, 13, 0, 2]
-          : id === 'globex'
-            ? [2, 2, 4, 1, 12, 10, 0, 6, 7, 11, 3]
-            : [0, 0, 1, 2, 3, 5, 4, 0, 10, 6, 7, 8, 11, 12, 13];
       const place = destinations[weights[i % weights.length]];
+      // Fabricated regional departures make country exploration useful. Keep all
+      // booking identities, destinations, dates, travellers and totals unchanged.
+      const hubIndex = (Math.floor(i / 3) * 2 + Math.max(0, (i % 3) - 1)) % originHubs.length;
+      const hub = originHubs[hubIndex];
+      const origin =
+        i % 3 === 0
+          ? homeOrigin
+          : hub === place.destination
+            ? originHubs[(hubIndex + 1) % originHubs.length]
+            : hub;
       trips.push({
         id: `${id}-t${serial}`,
         userId: u.id,
@@ -310,7 +322,7 @@ function makeCustomer(config: {
         booking: `${id.slice(0, 2).toUpperCase()}${String(serial + 1000).padStart(5, '0')}`,
         start: dateAt(ago),
         end: format(addDays(parseISO(dateAt(ago)), 2 + (i % 6)), 'yyyy-MM-dd'),
-        origin: id === 'northstar' ? 'Aberdeen' : id === 'globex' ? 'Amsterdam' : 'Manchester',
+        origin,
         ...place,
         provider: providers[i % providers.length],
       });

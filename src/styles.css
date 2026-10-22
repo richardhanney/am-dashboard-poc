@@ -432,6 +432,706 @@ a:focus-visible {
   padding: 0 20px 18px;
   display: block;
 }
+.footprint-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.footprint-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 20px 14px;
+}
+.footprint-tools {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.footprint-toolbar .MuiToggleButton-root {
+  font-size: 11px;
+  padding: 7px 11px;
+  line-height: 1.5;
+  text-transform: none;
+  color: #596168;
+  border-color: #deded8;
+}
+.footprint-toolbar .MuiToggleButton-root.Mui-selected {
+  color: #805619;
+  background: #f2ede4;
+}
+.footprint-tools .MuiToggleButton-root {
+  gap: 6px;
+}
+.footprint-tools .MuiSvgIcon-root {
+  font-size: 16px;
+}
+.footprint-toolbar .MuiButton-root {
+  font-size: 11px;
+}
+.footprint-context {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 0 20px 14px;
+  color: #6c747b;
+  font-size: 11px;
+}
+.footprint-context strong {
+  font-size: 16px;
+  font-weight: 500;
+  color: #172033;
+}
+.footprint-context strong span {
+  font-size: 11px;
+  color: #6c747b;
+  font-weight: 400;
+}
+.footprint-origin-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin: 0 20px 14px;
+  padding: 10px 12px;
+  border: 1px solid #e1ded4;
+  border-radius: 3px;
+  background: #faf8f2;
+}
+.footprint-origin-filter > div:first-child {
+  flex: 1;
+  min-width: 190px;
+}
+.footprint-origin-filter strong {
+  display: block;
+  color: #37434b;
+  font-size: 12px;
+  font-weight: 500;
+}
+.footprint-origin-filter > div:first-child > span {
+  display: block;
+  font-size: 10px;
+  color: #7b858b;
+  margin-top: 4px;
+}
+.footprint-origin-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 10px;
+  color: #6c747b;
+}
+.footprint-origin-legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.footprint-origin-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid #9e6b1f;
+}
+.origin-swatch {
+  background: #e2c88f;
+}
+.footprint-origin-legend .destination-swatch {
+  background: #bbd5d0;
+  border-color: #486f83;
+}
+.footprint-origin-filter .MuiButton-root {
+  font-size: 10px;
+}
+.footprint-risk-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  padding: 0 20px 14px;
+}
+.footprint-risk-filters button {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid #deded8;
+  border-radius: 3px;
+  background: #fff;
+  color: #596168;
+  font:
+    11px Inter,
+    sans-serif;
+  cursor: pointer;
+}
+.footprint-risk-filters button[aria-pressed='true'] {
+  background: #102231;
+  border-color: #102231;
+  color: #fff;
+}
+.footprint-risk-filters button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.footprint-risk-filters > span {
+  font-size: 10px;
+  color: #899093;
+  margin-left: 5px;
+}
+.footprint-safety-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 0 20px 14px;
+  font-size: 11px;
+  color: #6c747b;
+}
+.footprint-safety-key span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.footprint-safety-key i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.footprint-explorer-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  margin: 0 20px 14px;
+  border: 1px solid #deded8;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.footprint-visual {
+  min-width: 0;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.footprint-map-wrap {
+  position: relative;
+  isolation: isolate;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.footprint-map.leaflet-container {
+  height: 470px;
+  min-height: 470px;
+  flex: 1;
+  background: #dce8e9;
+  font-family: Inter, sans-serif;
+}
+.footprint-map .leaflet-interactive {
+  cursor: pointer;
+}
+.footprint-map path[role='button']:focus-visible {
+  outline: 2px solid #102231;
+  outline-offset: 2px;
+}
+.footprint-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: var(--marker-colour);
+  color: white;
+  font:
+    500 11px Inter,
+    sans-serif;
+  box-shadow: 0 1px 4px #10223150;
+  cursor: pointer;
+  padding: 0;
+}
+.footprint-cluster {
+  border: 3px double white;
+}
+.footprint-marker-selected {
+  outline: 2px solid var(--marker-colour);
+  outline-offset: 4px;
+  box-shadow:
+    0 0 0 7px #ffffffb3,
+    0 2px 8px #10223145;
+}
+.footprint-marker:hover,
+.footprint-marker:focus-visible {
+  outline: 3px solid #102231;
+  outline-offset: 3px;
+}
+.footprint-map .leaflet-tooltip {
+  font-family: Inter, sans-serif;
+  font-size: 11px;
+}
+.footprint-map .footprint-spotlight-label {
+  border: 1px solid #b89353;
+  color: #805619;
+  padding: 5px 9px;
+  font-weight: 500;
+  box-shadow: 0 2px 5px #10223118;
+}
+.footprint-map .leaflet-control-attribution {
+  font-size: 9px;
+  background: #fffffff0;
+}
+.footprint-map-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 700;
+  background: #fffffff2;
+  border: 1px solid #d6ddda;
+  border-radius: 3px;
+  padding: 9px 12px;
+  font-size: 11px;
+  color: #34434b;
+  pointer-events: none;
+}
+.footprint-map-badge small {
+  display: block;
+  margin: 4px 0 0 12px;
+  color: #7b858b;
+  font-size: 9px;
+}
+.footprint-context-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9e6b1f;
+  margin-right: 6px;
+}
+.footprint-reset-map.MuiButton-root {
+  position: absolute;
+  z-index: 800;
+  left: 52px;
+  bottom: 10px;
+  min-height: 34px;
+  background: #fffffff2;
+  border-color: #c4cbc7;
+  box-shadow: 0 1px 4px #10223118;
+  font-size: 11px;
+}
+.footprint-reset-map.MuiButton-root:hover {
+  background: #f7f3e9;
+}
+.footprint-time {
+  border-top: 1px solid #deded8;
+  padding: 14px 16px 12px;
+}
+.footprint-time-heading,
+.footprint-time-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  justify-content: space-between;
+}
+.footprint-time-heading strong {
+  font-size: 12px;
+  font-weight: 500;
+  color: #37434b;
+}
+.footprint-time-heading span {
+  font-size: 10px;
+  color: #7b858b;
+}
+.footprint-time-heading .MuiButton-root {
+  font-size: 10px;
+  min-height: 27px;
+  padding: 3px 8px;
+}
+.footprint-time-heading .MuiSvgIcon-root {
+  font-size: 19px;
+  color: #9e6b1f;
+}
+.footprint-time-bars {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 5px;
+  margin: 11px 0 8px;
+}
+.footprint-time-bars button {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  min-width: 0;
+  height: 72px;
+  padding: 5px 7px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: #f6f5f0;
+  font:
+    9px Inter,
+    sans-serif;
+  color: #6c747b;
+  cursor: pointer;
+  gap: 5px;
+}
+.footprint-time-bars button:hover {
+  background: #ede6d8;
+}
+.footprint-time-bars button[aria-pressed='true'] {
+  background: #eee2cc;
+  border-color: #9e6b1f;
+  color: #805619;
+}
+.footprint-time-bars .footprint-time-count {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 500;
+}
+.footprint-time-bars i {
+  display: block;
+  background: #b69255;
+  border-radius: 1px;
+}
+.footprint-time-bars button[aria-pressed='true'] i {
+  background: #805619;
+}
+.footprint-time > small {
+  display: block;
+  color: #899093;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.footprint-explorer-rail {
+  border-left: 1px solid #deded8;
+  padding: 14px 16px;
+  background: #fcfbf8;
+  min-width: 0;
+}
+.footprint-spotlight-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.footprint-spotlight-heading > span {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  color: #8f7c5b;
+  font-weight: 500;
+}
+.footprint-spotlight h3 {
+  font-family: Lora, Georgia, serif;
+  font-size: 25px;
+  margin: 8px 0 4px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: #172033;
+}
+.footprint-country {
+  font-size: 11px;
+  color: #7b858b;
+}
+.footprint-spotlight-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin: 15px 0 12px;
+}
+.footprint-spotlight-metrics button {
+  text-align: left;
+  border: 1px solid #e1ded4;
+  border-radius: 3px;
+  background: white;
+  padding: 9px 10px;
+  cursor: pointer;
+  color: #172033;
+  min-width: 0;
+}
+.footprint-spotlight-metrics button:hover:not(:disabled) {
+  border-color: #b69255;
+  background: #faf6ed;
+}
+.footprint-spotlight-metrics button:disabled {
+  cursor: default;
+}
+.footprint-spotlight-metrics strong {
+  display: block;
+  font-size: 21px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.footprint-spotlight-metrics span {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 3px;
+  font:
+    10px Inter,
+    sans-serif;
+  color: #7b858b;
+}
+.footprint-spotlight-metrics svg {
+  font-size: 12px;
+  color: #a68a5f;
+}
+.footprint-spotlight-note {
+  font-size: 10px;
+  color: #7b858b;
+  line-height: 1.6;
+  margin: 12px 0;
+}
+.footprint-route-summary {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: #6c747b;
+  border: 1px solid #e4dfd3;
+  border-radius: 3px;
+  padding: 8px 7px;
+  margin: 10px 0 12px;
+}
+.footprint-route-summary svg {
+  font-size: 14px;
+  color: #9e6b1f;
+  flex-shrink: 0;
+}
+.footprint-route-summary > strong {
+  margin-left: auto;
+  color: #805619;
+}
+.footprint-recent-journeys {
+  margin: 12px 0;
+}
+.footprint-recent-journeys > span {
+  font-size: 8px;
+  letter-spacing: 0.8px;
+  color: #8f9698;
+}
+.footprint-recent-journeys > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 9px;
+}
+.footprint-recent-journeys strong {
+  font-size: 11px;
+  font-weight: 500;
+}
+.footprint-recent-journeys small {
+  color: #899093;
+  font-size: 10px;
+}
+.footprint-spotlight > .MuiButton-root {
+  font-size: 10px;
+  margin-top: 3px;
+}
+.footprint-empty-spotlight {
+  font-size: 12px !important;
+  padding: 12px 0;
+  color: #7b858b;
+}
+.footprint-empty-spotlight h3 {
+  font-family: Lora, Georgia, serif;
+  color: #182131;
+  font-weight: 400;
+  font-size: 22px;
+  margin: 0 0 14px;
+}
+.footprint-empty-spotlight strong {
+  color: #37434b;
+  font-weight: 500;
+}
+.footprint-empty-spotlight p {
+  line-height: 1.6;
+}
+.footprint-ranking {
+  border-top: 1px solid #e1ded4;
+  margin-top: 16px;
+  padding-top: 14px;
+}
+.footprint-ranking-title {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 11px;
+}
+.footprint-ranking-title > strong {
+  font-weight: 500;
+}
+.footprint-ranking-title > span {
+  font-size: 10px;
+  color: #899093;
+}
+.footprint-ranking .MuiInputBase-root {
+  font-size: 11px;
+  background: white;
+}
+.footprint-ranking-list {
+  max-height: 195px;
+  overflow: auto;
+  margin-top: 8px;
+}
+.footprint-ranking-list > button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: 0;
+  border-radius: 3px;
+  padding: 9px 6px;
+  text-align: left;
+  cursor: pointer;
+  color: #37434b;
+}
+.footprint-ranking-list > button:hover {
+  background: #f0ece3;
+}
+.footprint-ranking-list > button[aria-pressed='true'] {
+  background: #eee4d1;
+}
+.footprint-ranking-index {
+  color: #a49d8c;
+  font-size: 10px;
+  min-width: 13px;
+}
+.footprint-ranking-list strong {
+  display: block;
+  font:
+    500 11px Inter,
+    sans-serif;
+}
+.footprint-ranking-list small {
+  display: block;
+  margin-top: 3px;
+  font-size: 9px;
+  color: #899093;
+}
+.footprint-ranking-value {
+  margin-left: auto;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.footprint-ranking-value small {
+  font-weight: 400;
+  font-size: 8px;
+}
+.footprint-ranking-list > p {
+  color: #7b858b;
+  font-size: 11px;
+  padding: 8px;
+}
+.footprint-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 20px 14px;
+}
+.footprint-footer .MuiTypography-root {
+  font-size: 10px;
+}
+.footprint-footer .MuiButton-root {
+  font-size: 10px;
+  white-space: nowrap;
+}
+@media (max-width: 1100px) {
+  .footprint-explorer-layout {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+  .footprint-map.leaflet-container {
+    height: 450px;
+    min-height: 450px;
+  }
+  .footprint-time-heading {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 800px) {
+  .footprint-explorer-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .footprint-explorer-rail {
+    border-left: 0;
+    border-top: 1px solid #deded8;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0 20px;
+  }
+  .footprint-spotlight-heading {
+    grid-column: 1 / -1;
+  }
+  .footprint-ranking {
+    margin-top: 0;
+    padding-top: 8px;
+    border-top: 0;
+  }
+  .footprint-ranking-list {
+    max-height: 300px;
+  }
+}
+@media (max-width: 600px) {
+  .footprint-toolbar,
+  .footprint-context,
+  .footprint-risk-filters,
+  .footprint-safety-key {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .footprint-explorer-layout {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+  .footprint-toolbar .MuiToggleButton-root {
+    font-size: 10px;
+    padding: 6px 8px;
+  }
+  .footprint-context {
+    gap: 5px;
+  }
+  .footprint-map.leaflet-container {
+    height: 330px;
+    min-height: 330px;
+  }
+  .footprint-map-badge {
+    font-size: 9px;
+    padding: 7px 8px;
+  }
+  .footprint-map-badge small {
+    font-size: 8px;
+  }
+  .footprint-time {
+    padding: 12px;
+  }
+  .footprint-time-heading {
+    gap: 8px;
+  }
+  .footprint-time-bars {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .footprint-time-bars button {
+    height: 65px;
+  }
+  .footprint-explorer-rail {
+    display: block;
+    padding: 14px;
+  }
+  .footprint-ranking {
+    border-top: 1px solid #deded8;
+    margin-top: 16px;
+    padding-top: 14px;
+  }
+  .footprint-ranking-list {
+    max-height: 205px;
+  }
+  .footprint-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
 .donut-layout {
   display: flex;
   flex-direction: column;

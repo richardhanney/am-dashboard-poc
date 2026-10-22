@@ -10,10 +10,32 @@ Validated with Node 24.4.0 and npm 11.4.2:
 
 - `npm ci`: clean lockfile installation.
 - `npm run lint`: ESLint and Prettier checks.
-- `npm test`: seven passing data/export contract tests.
+- `npm test`: seventeen passing data/export/map contract tests.
 - `npm run build`: strict TypeScript check and Vite static build.
 
 The tests cover headline/receipt reconciliation, fictional identities and example emails, event references, scenario differences, date filtering, equal-length comparisons, distinct recorded-engagement buckets, current enabled snapshots, check-in response-rate consistency and CSV escaping/formula neutralisation.
+
+## Traveller footprint explorer — 21 Oct 2026
+
+Overview now contains a full-width Leaflet explorer with origin-to-destination journey links, highlighted and keyboard-accessible countries, a destination spotlight, searchable location rankings, next/previous navigation, and an eight-interval timeline with play/pause. Risk chips replace the static Overview risk donut; the Travel tab retains its risk chart, region chart and destination rankings. Map metrics open the existing trip/check-in/SOS receipt drawers.
+
+The explorer's timeline and risk filters are local to the map and its supporting records. They do not change the global headline cards. All three view modes keep their counting definitions. Journey curves join recorded mock itinerary endpoints and are explicitly illustrative, not actual flight paths or live traveller positions. Country shading shows destination presence, not nationwide risk.
+
+The added contracts partition each customer/date preset into disjoint timeline windows, reconcile every receipt and distinct traveller, filter by exact trip risk, and reconcile journey-link counts to recorded origins/destinations. Origin-country contracts cover all twelve customer/preset combinations plus mixed origins, domestic trips and unmapped origins. Country bubbles conserve all destination records without combining countries and remain available after an empty-origin selection. Acme's Singapore, France and US selections each have departures to multiple countries in every preset. Empty/unmapped input, safety-only cities and grouping without duplicated records remain covered. Lint/formatting, seventeen tests and strict TypeScript/Vite build pass. The map is a separate lazy-loaded chunk.
+
+The map uses bundled public-domain Natural Earth outlines and makes no external map requests. The unavailable street-tile option, its World/Streets selector and retry notice were removed on 22 Oct 2026. Zooming, panning, country/destination selection, journey links, time/risk filters and receipt drawers remain available. No API key, geocoding, live tracking, paid service or production data was added. CSV generation contracts pass; automated download-event capture was unavailable in the in-app browser. The export implementation is unchanged.
+
+Production-preview browser checks covered destination search, next/previous navigation, country activation by keyboard, grouped-marker zoom, journey overlays, time scrubbing, play/pause, exact interval/risk descriptions in receipt drawers, higher-risk filtering and safety receipts. Acme's first map interval contained 49 trips while the global headline remained 412; its London drawer contained nine matching journeys. Higher-risk filtering produced 54 trips across Lagos and Nairobi. Globex reconciled to 680 trips over three months, 222 over one month and 2,254 over twelve months. Northstar's three-month view reconciled to 94 trips. All five dashboard tabs loaded. A 390px viewport retained the map, timeline and spotlight without horizontal overflow; no browser console warnings or errors were recorded. The Overview screenshot has been refreshed.
+
+### Journey-origin focus — 22 Oct 2026
+
+With Journey links enabled, country activation filters outgoing journeys, colours the origin gold and destination countries teal, and preserves map zoom. The source is the itinerary origin, not residence or nationality. Country and clear-selection activation left the rendered geography scale unchanged in the production preview. Globex's Netherlands origin remains selectable without any Netherlands destination records. Turning Journey links off restores destination-country controls; Safety activity suspends the origin filter. The source controls fit a 390px viewport without horizontal overflow. Browser console checks recorded no warnings or errors.
+
+Country bubbles now use the same origin-selection handler as country outlines, including repeated UK → US → UK clicks without changing the rendered geography scale. All country outlines are selectable in Journey links mode, including countries with no records; Spain was checked as an empty origin. Bubbles and location entries remain available for further selections after an empty result. Location-list, next-country and timeline clicks also preserved a manually chosen zoom. Automatic camera framing is suspended in Journey links mode after initial load; manual zoom, pan and Reset map remain available. Bubbles count destination trips before origin filtering, are grouped only within one country, and use leader lines to prevent nearby country buttons overlapping.
+
+The fabricated origin mix now spans 13 countries for Acme, 11 for Globex and seven for Northstar in the three-month range. All booking identities, dates, destinations, travellers and headline totals were retained. Acme still totals 412 trips; Singapore has 24 departures to nine countries, France 19 departures to eight, and the US 23 departures to eight. Switching these selections preserved map zoom. Spain has no departure/arrival records and shows a side-panel explanation. Northstar's third map interval has one arrival in Singapore and no departures; the panel correctly reads “1 journey arrives here.” No empty-state message covers the map. Reset map is a single button inside the map at bottom-left beside the relocated zoom controls; it restores the view and country scope. At 390px the controls remain inside the map with no horizontal overflow. The Overview screenshot has been refreshed with Singapore selected, and the Travel screenshot reflects the varied mock origins.
+
+Source publication and live deployment are separate. The Pages workflow remains manual-only; pushing source does not update the live demo.
 
 The production base is `/am-dashboard-poc/`. The manual deployment workflow uses GitHub's official pinned actions, installs the lockfile, runs all checks, builds and deploys `dist/`. It has only contents-read, pages-write and id-token-write workflow permissions. No stored application secrets or internal infrastructure are referenced.
 
@@ -54,7 +76,7 @@ Reviewed the source, comments, tests, HTML/package metadata, workflow, documenta
 - **Tooling metadata:** public npm registry/funding URLs, SVG namespace, loopback development URLs and GitHub's `id-token` permission are harmless build/runtime metadata, not private credentials or infrastructure.
 - **Internal design information:** the previous internal implementation/file inventory was replaced with a generic design note. Internal paths and proprietary implementation details are omitted.
 
-Source contains no external API calls. No private key, password, API key, access token, connection string, internal endpoint, real customer record or copied production implementation was found. No environment files, ZIPs, node_modules, dist, caches or session artifacts are committed. No licence has been added.
+Source contains no customer/provider API calls. The map uses bundled geography without external image requests, geocoding or real record transmission. No private key, password, API key, access token, connection string, internal endpoint, real customer record or copied production implementation was found. No environment files, ZIPs, node_modules, dist, caches or session artifacts are committed. No licence has been added.
 
 ## Screenshots
 
