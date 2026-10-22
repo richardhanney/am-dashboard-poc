@@ -52,7 +52,7 @@ The fixed fictional snapshot ends on 07 Oct 2026. Enabled accounts are a current
 
 ## GitHub Pages
 
-The deployment workflow is **manual-only**. Pushing source does not deploy the site. In repository Settings → Pages, choose **GitHub Actions**. Run **Deploy mock dashboard to GitHub Pages** from the Actions tab on `main`.
+Every push to **main** automatically builds and deploys the site through GitHub Actions. In repository Settings → Pages, choose **GitHub Actions**. To redeploy manually, run **Deploy mock dashboard to GitHub Pages** from the Actions tab on `main`.
 
 The workflow uses GitHub's official actions, Node 24, `npm ci`, lint, tests and the static build, then uploads `dist/` and deploys it to Pages. It sets the repository base path automatically. Tabs use local React state, so no server routing is required. Fonts, icons and the original SVG wordmark are bundled locally.
 

@@ -35,9 +35,9 @@ Country bubbles now use the same origin-selection handler as country outlines, i
 
 The fabricated origin mix now spans 13 countries for Acme, 11 for Globex and seven for Northstar in the three-month range. All booking identities, dates, destinations, travellers and headline totals were retained. Acme still totals 412 trips; Singapore has 24 departures to nine countries, France 19 departures to eight, and the US 23 departures to eight. Switching these selections preserved map zoom. Spain has no departure/arrival records and shows a side-panel explanation. Northstar's third map interval has one arrival in Singapore and no departures; the panel correctly reads “1 journey arrives here.” No empty-state message covers the map. Reset map is a single button inside the map at bottom-left beside the relocated zoom controls; it restores the view and country scope. At 390px the controls remain inside the map with no horizontal overflow. The Overview screenshot has been refreshed with Singapore selected, and the Travel screenshot reflects the varied mock origins.
 
-Source publication and live deployment are separate. The Pages workflow remains manual-only; pushing source does not update the live demo.
+Every push to `main` triggers the Pages workflow automatically. Manual redeployment remains available. The live site updates after the workflow's validation, build and deployment jobs succeed.
 
-The production base is `/am-dashboard-poc/`. The manual deployment workflow uses GitHub's official pinned actions, installs the lockfile, runs all checks, builds and deploys `dist/`. It has only contents-read, pages-write and id-token-write workflow permissions. No stored application secrets or internal infrastructure are referenced.
+The production base is `/am-dashboard-poc/`. The deployment workflow uses GitHub's official pinned actions, installs the lockfile, runs all checks, builds and deploys `dist/`. Automatic deployment is restricted to pushes on `main`; manual runs are also supported. It has only contents-read, pages-write and id-token-write workflow permissions. No stored application secrets or internal infrastructure are referenced.
 
 ## Production-preview browser checks
 

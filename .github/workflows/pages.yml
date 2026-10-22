@@ -1,7 +1,10 @@
 name: Deploy mock dashboard to GitHub Pages
 
-# Manual only: uploading source or pushing main does not publish this branded POC.
+# Deploy updates pushed to main; retain manual runs for redeployment.
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
