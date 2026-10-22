@@ -1785,3 +1785,336 @@ footer {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Browser-only account reporting and clearly labelled simulated activity. */
+.live-controls,
+.register-filters,
+.report-toolbar,
+.simulation-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.live-controls .MuiFormControlLabel-label {
+  font-size: 12px;
+}
+.live-controls .MuiFormControlLabel-root {
+  margin: 0;
+}
+.live-simulation-panel {
+  border: 1px solid #d9ded8;
+  background: #f6f8f5;
+  padding: 16px 18px;
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+  font-size: 12px;
+}
+.live-simulation-panel strong {
+  color: #34443d;
+  font-weight: 600;
+}
+.live-simulation-panel p {
+  color: #69746f;
+  line-height: 1.6;
+  margin: 7px 0;
+}
+.live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #939c97;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+.live-dot.running {
+  background: #3c7b61;
+}
+.live-event-feed {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.live-event-feed li {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #e2e7e0;
+}
+.live-event-feed time {
+  white-space: nowrap;
+  color: #69746f;
+  font-size: 10px;
+}
+.account-allocation-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.account-allocation-values > div,
+.account-allocation-values > button {
+  border: 1px solid #e3e1d9;
+  padding: 14px;
+  text-align: left;
+  background: #faf9f5;
+  color: #182131;
+  border-radius: 3px;
+  font: inherit;
+}
+.account-allocation-values > button {
+  cursor: pointer;
+}
+.account-allocation-values > button:hover {
+  border-color: #9e6b1f;
+}
+.account-allocation-values strong {
+  display: block;
+  font-size: 27px;
+  font-weight: 500;
+}
+.account-allocation-values span {
+  font-size: 11px;
+  color: #6c747b;
+}
+.allocation-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  font-size: 11px;
+  color: #6c747b;
+  margin-top: 16px;
+}
+.allocation-editor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #deded8;
+}
+.allocation-editor > .MuiAlert-root {
+  width: 100%;
+}
+.register-filters {
+  margin-bottom: 18px;
+}
+.register-filters .MuiTextField-root {
+  min-width: 220px;
+}
+.integration-register > .MuiAlert-root {
+  margin-bottom: 14px;
+}
+.report-toolbar {
+  margin: 20px 0;
+}
+.report-toolbar .MuiTextField-root {
+  min-width: 190px;
+}
+.report-print-root {
+  padding: 22px;
+  border: 1px solid #deded8;
+  color: #182131;
+}
+.report-print-root h2,
+.report-print-root h3 {
+  font-family: Lora, Georgia, serif;
+  font-weight: 400;
+}
+.report-print-root p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #667078;
+}
+.report-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+}
+.report-metric-grid > div {
+  padding: 13px;
+  border: 1px solid #e3e1d9;
+  background: #faf9f5;
+}
+.report-metric-grid span {
+  display: block;
+  font-size: 11px;
+  color: #667078;
+}
+.report-metric-grid strong {
+  display: block;
+  font-weight: 500;
+  margin-top: 8px;
+  font-size: 23px;
+}
+.report-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.report-chart-grid section {
+  min-width: 0;
+  border: 1px solid #e3e1d9;
+  padding: 14px;
+  break-inside: avoid;
+}
+.report-table-wrap {
+  overflow-x: auto;
+}
+.report-print-root table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 11px;
+}
+.report-print-root th,
+.report-print-root td {
+  border-bottom: 1px solid #e3e1d9;
+  text-align: left;
+  padding: 9px 6px;
+  overflow-wrap: anywhere;
+}
+.report-schedules {
+  margin-top: 30px;
+}
+.saved-schedule {
+  border-top: 1px solid #e3e1d9;
+  padding: 14px 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.saved-schedule > div {
+  flex: 1;
+  min-width: 230px;
+  font-size: 12px;
+}
+.saved-schedule p {
+  color: #667078;
+}
+@media (min-width: 961px) {
+  .operational-metrics,
+  .five-metrics,
+  .four-metrics {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  }
+}
+@media (max-width: 800px) {
+  .live-simulation-panel,
+  .report-chart-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .report-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .live-controls {
+    width: 100%;
+  }
+  .report-print-root {
+    padding: 12px;
+  }
+  .report-metric-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .report-toolbar .MuiTextField-root,
+  .register-filters .MuiTextField-root {
+    width: 100%;
+    min-width: 0;
+  }
+}
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+  body > #root,
+  .MuiBackdrop-root,
+  .report-controls,
+  .MuiDialogTitle-root {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  .report-dialog,
+  .report-dialog .MuiDialog-container {
+    position: static !important;
+    height: auto !important;
+    display: block !important;
+  }
+  .report-dialog .MuiDialog-paper {
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .report-dialog .MuiDialogContent-root {
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  .report-print-root {
+    padding: 0;
+    border: 0;
+  }
+  .report-chart-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .report-metric-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .report-print-root,
+  .report-print-root * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .report-table-wrap {
+    overflow: visible;
+  }
+}
+.usage-concepts.MuiAccordion-root {
+  border-color: #deded8;
+  border-radius: 4px;
+  box-shadow: none;
+}
+.usage-concepts .MuiAccordionSummary-content strong {
+  font-family: Lora, Georgia, serif;
+  font-weight: 400;
+  font-size: 19px;
+}
+.usage-concepts .MuiAccordionSummary-content p {
+  font-size: 11px;
+  color: #6c747b;
+  margin: 6px 0 0;
+}
+.usage-concepts .MuiAccordionDetails-root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.concept-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.concept-summary > span {
+  border: 1px solid #e3e1d9;
+  background: #faf9f5;
+  padding: 14px;
+  font-size: 12px;
+  color: #6c747b;
+}
+.concept-summary strong {
+  display: block;
+  font-size: 24px;
+  font-weight: 500;
+  color: #182131;
+  margin-bottom: 8px;
+}

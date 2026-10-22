@@ -20,7 +20,10 @@ export const previousRange = (range: Range): Range => {
 };
 export const fmtDate = (date: string | null) =>
   date
-    ? format(parseISO(date), date.includes('T') ? 'dd MMM yyyy, HH:mm' : 'dd MMM yyyy')
+    ? format(
+        parseISO(date.replace(/Z$/, '')),
+        date.includes('T') ? 'dd MMM yyyy, HH:mm' : 'dd MMM yyyy',
+      )
     : 'No recorded evidence';
 export const n = (value: number) => value.toLocaleString('en-GB');
 export type Platform = 'Web' | 'iOS' | 'Android';
@@ -33,6 +36,8 @@ export type User = {
   enabled: boolean;
   mobile: boolean;
   registeredFrom: string | null;
+  createdAt: string;
+  creationSource: string;
 };
 export type Activity = {
   id: string;
@@ -81,6 +86,24 @@ export type AlertRecord = {
   recipients: string[];
   date: string;
   location: string;
+  channel: string;
+  targeting: string;
+};
+export type ReceivedCheckIn = {
+  id: string;
+  userId: string;
+  traveller: string;
+  time: string;
+  location: string;
+  requestId: string | null;
+  source: string;
+};
+export type Ingestion = {
+  id: string;
+  time: string;
+  provider: string;
+  booking: string;
+  status: 'Accepted';
 };
 export type Integration = {
   id: string;
@@ -105,6 +128,8 @@ export type Customer = {
   sos: Sos[];
   alerts: AlertRecord[];
   integrations: Integration[];
+  receivedCheckins: ReceivedCheckIn[];
+  ingestions: Ingestion[];
 };
 
 const firstNames = [
@@ -255,6 +280,8 @@ function makeCustomer(config: {
     enabled: i < enabled,
     mobile: i < mobile,
     registeredFrom: i < mobile ? dateAt(380 + (i % 140)) : null,
+    createdAt: `${dateAt(760 + (i % 200))}T00:00:00`,
+    creationSource: ['HR import', 'Portal', 'SSO provisioning', 'Travel import'][i % 4],
   }));
   const activities: Activity[] = [];
   users.forEach((u, i) => {
@@ -394,6 +421,8 @@ function makeCustomer(config: {
       recipients,
       date: `${dateAt(ago)}T08:40:00`,
       location: trip.destination,
+      channel: ['Email', 'SMS', 'Push'][i % 3],
+      targeting: ['Itinerary destination', 'Facility association', 'Recorded location'][i % 3],
     };
   });
   const integrations: Integration[] = [
@@ -444,7 +473,80 @@ function makeCustomer(config: {
       detail: 'Simulated feed delay. Review provider feed with the account team.',
     },
   ];
-  return { ...config, users, activities, trips, checkins, sos, alerts, integrations };
+  // Give some profiles recent creation dates without moving their latest recorded
+  // platform activity. All earlier evidence is reconciled to the creation date.
+  for (const [index, user] of users.entries()) {
+    if (index >= travelPool.length && index % 5 === 0) {
+      const latestByPlatform = new Map<string, string>();
+      for (const activity of activities.filter((a) => a.userId === user.id)) {
+        if (
+          !latestByPlatform.has(activity.platform) ||
+          latestByPlatform.get(activity.platform)! < activity.date
+        )
+          latestByPlatform.set(activity.platform, activity.date);
+      }
+      const earliestLatest = [...latestByPlatform.values()].sort()[0];
+      user.createdAt = earliestLatest
+        ? `${format(addDays(parseISO(earliestLatest), -1), 'yyyy-MM-dd')}T00:00:00`
+        : `${dateAt((index * 17) % 365)}T00:00:00`;
+      if (user.mobile) user.registeredFrom = user.createdAt.slice(0, 10);
+    }
+  }
+  const userMap = new Map(users.map((u) => [u.id, u]));
+  const coherentActivities = activities.filter((a) => a.date >= userMap.get(a.userId)!.createdAt);
+  for (const alert of alerts) {
+    const wanted = alert.recipients.length;
+    const eligible = users.filter((u) => u.enabled && u.createdAt <= alert.date);
+    const recipients = new Set(
+      alert.recipients.filter((id) => userMap.get(id)!.createdAt <= alert.date),
+    );
+    for (const user of eligible) {
+      if (recipients.size >= wanted) break;
+      recipients.add(user.id);
+    }
+    alert.recipients = [...recipients];
+  }
+  const receivedCheckins: ReceivedCheckIn[] = checkins
+    .filter((c) => c.completed)
+    .map((c) => ({
+      id: `${c.id}-received`,
+      userId: c.userId,
+      traveller: c.traveller,
+      time: c.completed!,
+      location: c.location,
+      requestId: c.id,
+      source: 'Scheduled response',
+    }));
+  for (const [index, trip] of trips.filter((_, i) => i % 19 === 0).entries()) {
+    receivedCheckins.push({
+      id: `${id}-self-check-${index}`,
+      userId: trip.userId,
+      traveller: trip.traveller,
+      time: `${trip.start}T12:20:00`,
+      location: trip.destination,
+      requestId: null,
+      source: 'Traveller-initiated',
+    });
+  }
+  const ingestions: Ingestion[] = trips.map((trip, index) => ({
+    id: `${trip.id}-ingestion`,
+    time: `${format(addDays(parseISO(trip.start), -2 - (index % 5)), 'yyyy-MM-dd')}T08:30:00`,
+    provider: trip.provider,
+    booking: trip.booking,
+    status: 'Accepted',
+  }));
+  return {
+    ...config,
+    users,
+    activities: coherentActivities,
+    trips,
+    checkins,
+    sos,
+    alerts,
+    integrations,
+    receivedCheckins,
+    ingestions,
+  };
 }
 
 export const customers: Customer[] = [
@@ -534,19 +636,39 @@ export function userRows(customer: Customer, range: Range) {
       selected.get(a.userId)!.add(a.platform);
     }
   });
+  const bookingUsers = new Map(customer.trips.map((trip) => [trip.booking, trip.userId]));
+  const pnrEvidence = new Map<string, Ingestion>();
+  for (const ingestion of customer.ingestions) {
+    const userId = bookingUsers.get(ingestion.booking);
+    if (
+      userId &&
+      ingestion.time.slice(0, 10) >= observedFloor &&
+      ingestion.time.slice(0, 10) <= range.to &&
+      (!pnrEvidence.has(userId) || pnrEvidence.get(userId)!.time < ingestion.time)
+    )
+      pnrEvidence.set(userId, ingestion);
+  }
   return customer.users.map((u) => {
     const a = latest.get(u.id);
+    const pnr = pnrEvidence.get(u.id);
+    const lastEvidence = pnr && (!a || pnr.time > a.date) ? pnr.time : a?.date || null;
     const platforms = [...(selected.get(u.id) || [])];
     return {
       ...u,
       enabled: u.enabled,
-      mobile: u.mobile && !!u.registeredFrom && u.registeredFrom <= range.to,
+      mobile: u.mobile && !!u.registeredFrom && u.registeredFrom.slice(0, 10) <= range.to,
       lastActivity: a?.date || null,
       source: a?.source || 'No recorded evidence',
       platform: platforms.length > 1 ? 'Multi-platform' : platforms[0] || 'No recorded evidence',
       platforms,
       engaged: platforms.length > 0,
       age: ageBand(a?.date || null, range.to),
+      lastEvidence,
+      evidenceSource:
+        pnr && lastEvidence === pnr.time
+          ? `PNR receipt · ${pnr.provider}`
+          : a?.source || 'No recorded evidence',
+      lastPnrReceipt: pnr?.time || null,
     };
   });
 }
@@ -562,14 +684,21 @@ export const groupCounts = <T>(rows: T[], key: (row: T) => string) => {
 };
 export function selectData(customer: Customer, range: Range) {
   const users = userRows(customer, range);
+  const identity = new Map(customer.users.map((user) => [user.id, user.email]));
   const engaged = users.filter((u) => u.engaged);
   const trips = customer.trips.filter((t) => inRange(t.start, range));
-  const checkins = customer.checkins.filter((c) => inRange(c.requested, range));
-  const sos = customer.sos.filter((s) => inRange(s.time, range));
+  const checkins = customer.checkins
+    .filter((c) => inRange(c.requested, range))
+    .map((c) => ({ ...c, email: identity.get(c.userId) || 'No recorded evidence' }));
+  const sos = customer.sos
+    .filter((s) => inRange(s.time, range))
+    .map((s) => ({ ...s, email: identity.get(s.userId) || 'No recorded evidence' }));
   const alerts = customer.alerts.filter((a) => inRange(a.date, range));
   const completed = checkins.filter((c) => c.status === 'Completed').length;
   return {
     users,
+    created: users.filter((u) => inRange(u.createdAt, range)),
+    disabled: users.filter((u) => !u.enabled),
     engaged,
     enabled: users.filter((u) => u.enabled),
     mobile: engaged.filter((u) => u.platforms.some((p) => p === 'iOS' || p === 'Android')),
@@ -578,6 +707,10 @@ export function selectData(customer: Customer, range: Range) {
     checkins,
     sos,
     alerts,
+    receivedCheckins: customer.receivedCheckins
+      .filter((c) => inRange(c.time, range))
+      .map((c) => ({ ...c, email: identity.get(c.userId) || 'No recorded evidence' })),
+    ingestions: customer.ingestions.filter((i) => inRange(i.time, range)),
     travellers: new Set(trips.map((t) => t.userId)).size,
     countries: new Set(trips.map((t) => t.country)).size,
     highRisk: trips.filter((t) => ['High', 'Severe'].includes(t.risk)),
@@ -627,6 +760,7 @@ export function timeline(customer: Customer, range: Range) {
       web: slice.engaged.filter((u) => u.platforms.includes('Web')).length,
       trips: slice.trips.length,
       sends: slice.sends,
+      created: slice.created.length,
     };
   });
 }

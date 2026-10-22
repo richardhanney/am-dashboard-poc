@@ -1,10 +1,9 @@
-import { lazy, Suspense, useMemo, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   Alert,
   Avatar,
   Button,
   Checkbox,
-  CircularProgress,
   Divider,
   Drawer,
   FormControlLabel,
@@ -45,7 +44,6 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import LinkIcon from '@mui/icons-material/Link';
 import {
   AGE_BANDS,
-  SNAPSHOT,
   customers,
   fmtDate,
   groupCounts,
@@ -73,15 +71,28 @@ import {
   TimeLines,
   tripColumns,
   userColumns,
+  profileColumns,
   type Metric,
 } from './components';
 import { downloadCsv, type CsvRow } from './export';
+import AccountCapacity from './AccountCapacity';
+import UsageConcepts from './AdditionalUsage';
+import IntegrationRegister from './IntegrationRegister';
+import ReportCenter from './ReportCenter';
+import { advanceSimulation, demoClock, initialSimulation } from './simulation';
+import {
+  captureReport,
+  ExportContext,
+  withExportScope,
+  type ExportScope,
+  type ReportSnapshot,
+} from './reporting';
 import CelebrateButton from './CelebrateButton';
 
 const TravellerFootprint = lazy(() => import('./TravellerFootprint'));
 
 const tabs = ['Overview', 'Users', 'Travel', 'Safety & Alerts', 'Integrations'];
-const defaultLayout = ['enabled', 'limit', 'engaged', 'mobile', 'trips'];
+const defaultLayout = ['enabled', 'limit', 'created', 'engaged', 'mobile', 'trips'];
 type Layout = { order: string[]; hidden: string[] };
 function loadLayout(): Layout {
   try {
@@ -89,19 +100,23 @@ function loadLayout(): Layout {
     if (
       value &&
       Array.isArray(value.order) &&
-      value.order.length === 5 &&
-      new Set(value.order).size === 5 &&
+      value.order.length >= 5 &&
+      new Set(value.order).size === value.order.length &&
       value.order.every((id: string) => defaultLayout.includes(id)) &&
       Array.isArray(value.hidden) &&
       value.hidden.every((id: string) => defaultLayout.includes(id))
     )
-      return value;
+      return {
+        ...value,
+        order: [...value.order, ...defaultLayout.filter((id) => !value.order.includes(id))],
+      };
   } catch {
     /* Storage may be unavailable in a private browser. */
   }
   return { order: defaultLayout, hidden: [] };
 }
 type Detail = {
+  scope?: ExportScope;
   title: string;
   description: string;
   rows?: GridValidRowModel[];
@@ -115,7 +130,28 @@ export default function App() {
   const [customerId, setCustomerId] = useState('acme');
   const [tab, setTab] = useState(0);
   const [safetyTab, setSafetyTab] = useState(0);
-  const [range, setRange] = useState<Range>(presetRange(3));
+  const [reportRange, setRange] = useState<Range>(presetRange(3));
+  const [simulation, setSimulation] = useState(initialSimulation);
+  const [live, setLive] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [savedRange, setSavedRange] = useState<Range | null>(null);
+  const [reportSnapshot, setReportSnapshot] = useState<ReportSnapshot | null>(null);
+  const [editingContact, setEditingContact] = useState(false);
+  const [allocations, setAllocations] = useState<
+    Record<string, { limit: number | null; threshold: number }>
+  >(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('serenity-allocation-v1') || '{}');
+      return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+    } catch {
+      return {};
+    }
+  });
+  const range = useMemo(
+    () =>
+      live ? { from: simulation.now.slice(0, 10), to: simulation.now.slice(0, 10) } : reportRange,
+    [live, simulation.now, reportRange],
+  );
   const [draftFrom, setDraftFrom] = useState<Date | null>(parseISO(range.from));
   const [draftTo, setDraftTo] = useState<Date | null>(parseISO(range.to));
   const [preset, setPreset] = useState<number | null>(3);
@@ -123,9 +159,29 @@ export default function App() {
   const [customise, setCustomise] = useState(false);
   const [layout, setLayout] = useState<Layout>(loadLayout);
   const [toast, setToast] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
-  const [updated, setUpdated] = useState('07 Oct 2026, 10:30');
-  const customer = customers.find((c) => c.id === customerId)!;
+  const running =
+    (live || autoRefresh) && !detail && !customise && !reportSnapshot && !editingContact;
+  useEffect(() => {
+    if (!running) return;
+    const timer = window.setInterval(
+      () => setSimulation((state) => advanceSimulation(state, customerId)),
+      live ? 4000 : 8000,
+    );
+    return () => window.clearInterval(timer);
+  }, [running, live, customerId]);
+  const updated = demoClock(simulation.now);
+  const customer = simulation.customers.find((c) => c.id === customerId)!;
+  const storedAllocation = allocations[customerId];
+  const allocation =
+    storedAllocation &&
+    (storedAllocation.limit === null ||
+      (Number.isInteger(storedAllocation.limit) && storedAllocation.limit >= 0))
+      ? storedAllocation.limit
+      : customer.limit;
+  const threshold =
+    storedAllocation && [80, 85, 90, 95].includes(storedAllocation.threshold)
+      ? storedAllocation.threshold
+      : 85;
   const data = useMemo(() => selectData(customer, range), [customer, range]);
   const previous = useMemo(() => selectData(customer, previousRange(range)), [customer, range]);
   const points = useMemo(() => timeline(customer, range), [customer, range]);
@@ -133,8 +189,44 @@ export default function App() {
     .sort((a, b) => (b.lastActivity || '').localeCompare(a.lastActivity || ''))
     .slice(0, 5);
   const prefix = `${customer.id}-${range.from}-${range.to}`;
-  const percent = (data.enabled.length / customer.limit) * 100;
-  const accountFocus = `${customer.name} has ${n(data.enabled.length)} enabled accounts against a configured limit of ${n(customer.limit)}. ${customer.focus}`;
+  const percent =
+    allocation === null
+      ? 0
+      : allocation === 0
+        ? data.enabled.length
+          ? 100
+          : 0
+        : (data.enabled.length / allocation) * 100;
+  const exportScope = {
+    customer: customer.name,
+    ...range,
+    asOf: simulation.now,
+    snapshotId: `${customer.id}-r${simulation.revision}`,
+  };
+  const downloadSnapshotCsv = (name: string, rows: CsvRow[], columns?: string[]) => {
+    const scoped = withExportScope(rows, exportScope);
+    downloadCsv(`${name}-${exportScope.snapshotId}`, scoped, [
+      ...new Set([...(columns || []), ...scoped.flatMap((row) => Object.keys(row))]),
+    ]);
+  };
+  const receivedColumns: GridColDef[] = [
+    { field: 'traveller', headerName: 'Traveller', width: 180 },
+    { field: 'email', headerName: 'Email', width: 260 },
+    { field: 'time', headerName: 'Received at', width: 180 },
+    { field: 'location', headerName: 'Location', width: 150 },
+    { field: 'source', headerName: 'Receipt source', width: 180 },
+    { field: 'requestId', headerName: 'Linked request', width: 190 },
+  ];
+  const ingestionColumns: GridColDef[] = [
+    { field: 'provider', headerName: 'Provider', width: 160 },
+    { field: 'time', headerName: 'Accepted at', width: 180 },
+    { field: 'booking', headerName: 'Booking reference', width: 190 },
+    { field: 'status', headerName: 'Status', width: 120 },
+  ];
+  const accountFocus =
+    allocation === null
+      ? `${customer.name} has ${n(data.enabled.length)} enabled accounts. A configured user limit has not been set. ${customer.focus}`
+      : `${customer.name} has ${n(data.enabled.length)} enabled accounts against a configured limit of ${allocation === null ? 'not configured' : n(allocation)}. ${customer.focus}`;
   const file = (kind: string) => `${prefix}-${kind}-MOCK`;
   const openRecords = (
     title: string,
@@ -143,7 +235,16 @@ export default function App() {
     columns: GridColDef[],
     kind: string,
     onRow?: (row: GridValidRowModel) => void,
-  ) => setDetail({ title, description, rows, columns, filename: file(kind), onRow });
+  ) =>
+    setDetail({
+      title,
+      scope: exportScope,
+      description: `${description} Captured snapshot ${exportScope.snapshotId} · data as of ${updated}. Live simulation pauses while these records are open.`,
+      rows,
+      columns,
+      filename: file(kind),
+      onRow,
+    });
   const showUsers = (
     rows = data.engaged,
     title = `${n(rows.length)} engaged users`,
@@ -200,7 +301,7 @@ export default function App() {
       content: (
         <>
           <Typography variant="h2">
-            {n(data.enabled.length)} / {n(customer.limit)}
+            {n(data.enabled.length)} / {allocation === null ? 'Not configured' : n(allocation)}
           </Typography>
           <LinearProgress
             variant="determinate"
@@ -209,7 +310,10 @@ export default function App() {
           />
           <Typography>
             {percent.toFixed(1)}% of configured capacity ·{' '}
-            {n(Math.max(0, customer.limit - data.enabled.length))} accounts of headroom
+            {allocation === null
+              ? 'Not configured'
+              : n(Math.max(0, allocation - data.enabled.length))}{' '}
+            accounts of headroom
           </Typography>
           <Alert severity="info" sx={{ mt: 3 }}>
             Commercial 365-day active-user definition to be validated separately.
@@ -223,25 +327,40 @@ export default function App() {
       label: 'Enabled accounts',
       value: data.enabled.length,
       icon: <PeopleOutlineIcon />,
-      note: `Current snapshot · ${fmtDate(SNAPSHOT)}`,
+      note: `Current mock snapshot · ${simulation.now.slice(0, 10)}`,
       definition:
-        'Accounts enabled in the current fictional snapshot at 07 Oct 2026, independent of selected reporting dates. Historical enabled-account state is not reconstructed. Enabled status is not commercial active-user status.',
+        'Accounts enabled in the current fictional snapshot, independent of selected reporting dates. Historical enabled-account state is not reconstructed. Enabled status is not commercial active-user status.',
       onClick: () =>
         showUsers(
           data.enabled,
           `${n(data.enabled.length)} enabled accounts`,
-          'Fictional accounts enabled in the current snapshot at 07 Oct 2026, independent of selected reporting dates. Enabled status does not establish recorded engagement or commercial active-user status.',
+          'Fictional accounts enabled in the current snapshot, independent of selected reporting dates. Enabled status does not establish recorded engagement or commercial active-user status.',
         ),
     },
     limit: {
       id: 'limit',
       label: 'Configured user limit',
-      value: customer.limit,
+      value: allocation ?? 'Not configured',
       icon: <VerifiedUserOutlinedIcon />,
-      note: `${percent.toFixed(1)}% configured capacity used`,
+      note:
+        allocation === null
+          ? 'Allocation not configured'
+          : `${percent.toFixed(1)}% configured capacity used`,
       definition: 'A fictional configured user limit. No purchased licence count is claimed.',
       onClick: capacity,
-      progress: percent,
+      progress: allocation === null ? undefined : percent,
+    },
+    created: {
+      id: 'created',
+      label: 'Profiles created',
+      value: data.created.length,
+      icon: <PeopleOutlineIcon />,
+      note: 'Created in selected period',
+      definition:
+        'Distinct fictional profiles by creation timestamp in the selected period. Creation is separate from enabled status, engagement and commercial billing.',
+      previous: previous.created.length,
+      current: data.created.length,
+      onClick: () => showGrowth(),
     },
     engaged: {
       id: 'engaged',
@@ -284,7 +403,7 @@ export default function App() {
   const operations: Metric[] = [
     {
       id: 'checks',
-      label: 'Check-in records',
+      label: 'Check-in requests sent',
       value: data.checkins.length,
       icon: <CheckCircleOutlineIcon />,
       note: `${n(data.completed)} completed`,
@@ -321,6 +440,23 @@ export default function App() {
         'Completed check-ins divided by all requests, including pending and missed. Zero requests has no rate.',
       onClick: showChecks,
     },
+    {
+      id: 'received',
+      label: 'Check-ins received',
+      value: data.receivedCheckins.length,
+      icon: <CheckCircleOutlineIcon />,
+      note: 'Counted by receipt time',
+      definition:
+        'Received check-in events in the selected period, including scheduled responses and traveller-initiated records. This is separate from requests sent and the request-cohort response rate.',
+      onClick: () =>
+        openRecords(
+          'Received check-ins',
+          'Counted by receipt time. A received event can be unscheduled. Request-cohort response rate is calculated separately.',
+          data.receivedCheckins,
+          receivedColumns,
+          'received-checkins',
+        ),
+    },
   ];
   const user30 = useMemo(
     () =>
@@ -339,10 +475,11 @@ export default function App() {
       ? 'Enter two valid dates.'
       : draftFrom > draftTo
         ? 'From date must be on or before To date.'
-        : formatDate(draftFrom) < '2025-10-08' || formatDate(draftTo) > SNAPSHOT
-          ? 'Choose dates between 08 Oct 2025 and 07 Oct 2026.'
+        : formatDate(draftFrom) < '2025-10-08' || formatDate(draftTo) > simulation.now.slice(0, 10)
+          ? `Choose dates between 08 Oct 2025 and ${simulation.now.slice(0, 10)}.`
           : '';
   const applyDate = (from: Date | null, to: Date | null) => {
+    setLive(false);
     setPreset(null);
     if (
       from &&
@@ -351,11 +488,13 @@ export default function App() {
       isValid(to) &&
       from <= to &&
       formatDate(from) >= '2025-10-08' &&
-      formatDate(to) <= SNAPSHOT
+      formatDate(to) <= simulation.now.slice(0, 10)
     )
       setRange({ from: formatDate(from), to: formatDate(to) });
   };
   const changePreset = (months: number) => {
+    setLive(false);
+    setSavedRange(null);
     const next = presetRange(months);
     setRange(next);
     setDraftFrom(parseISO(next.from));
@@ -376,22 +515,65 @@ export default function App() {
     saveLayout({ ...layout, order });
   };
   const refresh = () => {
-    setRefreshing(true);
-    setTimeout(() => {
-      setUpdated(
-        new Intl.DateTimeFormat('en-GB', {
-          timeZone: 'Europe/London',
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        }).format(new Date()),
-      );
-      setRefreshing(false);
-      setToast('Mock snapshot refreshed locally. No external data was requested.');
-    }, 550);
+    setSimulation((state) => advanceSimulation(state, customerId));
+    setToast(
+      'One fictional event recorded locally; matching metrics and receipts updated. No external data requested.',
+    );
   };
+  const toggleLive = () => {
+    setAutoRefresh(false);
+    if (live) {
+      setRange(range);
+      setDraftFrom(parseISO(range.from));
+      setDraftTo(parseISO(range.to));
+      setLive(false);
+    } else {
+      if (!savedRange) setSavedRange(range);
+      setPreset(null);
+      setLive(true);
+      setSimulation((state) => advanceSimulation(state, customerId));
+    }
+  };
+  const showGrowth = () =>
+    openRecords(
+      `${n(data.created.length)} profiles created`,
+      'Profiles created in the selected period. Creation date and source are separate from account status, engagement and commercial billing.',
+      data.created,
+      profileColumns,
+      'profiles-created',
+    );
+  const allocationPanel = (
+    <AccountCapacity
+      key={customer.id}
+      data={data}
+      allocation={allocation}
+      threshold={threshold}
+      onEnabled={() =>
+        showUsers(
+          data.enabled,
+          'Enabled accounts',
+          'Current enabled-account snapshot; independent of reporting dates.',
+        )
+      }
+      onDisabled={() =>
+        showUsers(
+          data.disabled,
+          'Disabled accounts',
+          'Current disabled-account snapshot; this does not establish commercial inactivity.',
+        )
+      }
+      onSave={(limit, threshold) => {
+        const next = { ...allocations, [customerId]: { limit, threshold } };
+        setAllocations(next);
+        try {
+          localStorage.setItem('serenity-allocation-v1', JSON.stringify(next));
+          setToast('Fictional allocation saved in this browser.');
+        } catch {
+          setToast('Fictional allocation saved for this session only.');
+        }
+      }}
+    />
+  );
   const exportSummary = () => {
     const rows: CsvRow[] = [
       { Metric: 'Data classification', Value: 'FABRICATED EVENT PROTOTYPE' },
@@ -400,6 +582,10 @@ export default function App() {
       { Metric: 'To', Value: range.to },
       ...Object.values(metrics).map((m) => ({ Metric: m.label, Value: m.value })),
       ...operations.map((m) => ({ Metric: m.label, Value: m.value })),
+      { Metric: 'Profiles created', Value: data.created.length },
+      { Metric: 'Disabled accounts', Value: data.disabled.length },
+      { Metric: 'Check-ins received', Value: data.receivedCheckins.length },
+      { Metric: 'Accepted PNR ingestions', Value: data.ingestions.length },
       { Metric: 'Unique alert recipients', Value: data.recipients },
       { Metric: 'Distinct travellers', Value: data.travellers },
       { Metric: 'Higher-risk trips', Value: data.highRisk.length },
@@ -408,7 +594,7 @@ export default function App() {
         Value: '365-day active-user definition to be validated separately',
       },
     ];
-    downloadCsv(file('summary'), rows);
+    downloadSnapshotCsv(file('summary'), rows);
     setToast('Mock summary CSV exported.');
   };
   const activeIntegrations = customer.integrations.filter((i) => i.status === 'Active');
@@ -464,7 +650,7 @@ export default function App() {
     },
   ];
   return (
-    <>
+    <ExportContext.Provider value={exportScope}>
       <a className="skip-link" href="#main">
         Skip to dashboard
       </a>
@@ -528,8 +714,9 @@ export default function App() {
                         customer data. The map uses bundled geography with no external map requests.
                       </Typography>
                       <Typography sx={{ mt: 2 }}>
-                        The mock dataset ends on 07 Oct 2026. Refresh updates the local timestamp
-                        only. Layout preferences are the only data saved in this browser.
+                        The baseline is 07 Oct 2026. Live and Auto-refresh generate fictional
+                        records in this browser. No live data is fetched. Mock allocations, contact
+                        notes, layout preferences and schedule configurations can be saved locally.
                       </Typography>
                       <img
                         className="help-easter-egg"
@@ -572,7 +759,11 @@ export default function App() {
             <Button
               variant="contained"
               startIcon={<FileDownloadOutlinedIcon />}
-              onClick={exportSummary}
+              onClick={() =>
+                setReportSnapshot(
+                  captureReport(customer, range, simulation.now, simulation.revision, allocation),
+                )
+              }
             >
               Export Report
             </Button>
@@ -601,26 +792,30 @@ export default function App() {
           </TextField>
           <DesktopDatePicker
             label="From date"
-            value={draftFrom}
+            value={live ? parseISO(range.from) : draftFrom}
             onChange={(date) => {
               setDraftFrom(date);
-              applyDate(date, draftTo);
+              const to = live ? parseISO(range.to) : draftTo;
+              if (live) setDraftTo(to);
+              applyDate(date, to);
             }}
             minDate={parseISO('2025-10-08')}
-            maxDate={parseISO(SNAPSHOT)}
+            maxDate={parseISO(simulation.now.slice(0, 10))}
             format="dd/MM/yyyy"
             enableAccessibleFieldDOMStructure={false}
             slotProps={{ textField: { size: 'small', className: 'date-field' } }}
           />
           <DesktopDatePicker
             label="To date"
-            value={draftTo}
+            value={live ? parseISO(range.to) : draftTo}
             onChange={(date) => {
               setDraftTo(date);
-              applyDate(draftFrom, date);
+              const from = live ? parseISO(range.from) : draftFrom;
+              if (live) setDraftFrom(from);
+              applyDate(from, date);
             }}
             minDate={parseISO('2025-10-08')}
-            maxDate={parseISO(SNAPSHOT)}
+            maxDate={parseISO(simulation.now.slice(0, 10))}
             format="dd/MM/yyyy"
             enableAccessibleFieldDOMStructure={false}
             slotProps={{ textField: { size: 'small', className: 'date-field' } }}
@@ -637,9 +832,30 @@ export default function App() {
               </Button>
             ))}
           </div>
+          <div className="live-controls">
+            <Button
+              variant={live ? 'contained' : 'outlined'}
+              aria-pressed={live}
+              onClick={toggleLive}
+              title="Run fictional updates every four seconds on the demo day. No real data or APIs."
+            >
+              {live ? 'Pause live' : 'Live'}
+            </Button>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={autoRefresh}
+                  disabled={live}
+                  onChange={(_, value) => setAutoRefresh(value)}
+                />
+              }
+              label="Auto-refresh"
+            />
+          </div>
           <div className="refresh-group">
             <div>
-              <span>Last updated</span>
+              <span>Mock data as of</span>
               <strong>{updated}</strong>
             </div>
             <Tooltip title="Refresh mock snapshot locally">
@@ -647,14 +863,9 @@ export default function App() {
                 aria-label="Refresh"
                 variant="outlined"
                 onClick={refresh}
-                disabled={refreshing}
                 className="refresh-button"
               >
-                {refreshing ? (
-                  <CircularProgress size={17} />
-                ) : (
-                  <RefreshIcon sx={{ fontSize: 19 }} />
-                )}
+                <RefreshIcon sx={{ fontSize: 19 }} />
               </Button>
             </Tooltip>
           </div>
@@ -673,7 +884,8 @@ export default function App() {
           </div>
           <span>
             {fmtDate(range.from)} — {fmtDate(range.to)} ·{' '}
-            {differenceInCalendarDays(parseISO(range.to), parseISO(range.from)) + 1} days
+            {differenceInCalendarDays(parseISO(range.to), parseISO(range.from)) + 1}{' '}
+            {range.from === range.to ? 'day' : 'days'}
           </span>
         </div>
         <Tabs
@@ -689,7 +901,77 @@ export default function App() {
             <Tab key={name} label={name} id={`tab-${i}`} aria-controls={`panel-${i}`} />
           ))}
         </Tabs>
-        {refreshing && <LinearProgress aria-label="Refreshing mock data" />}
+        {(live || autoRefresh || simulation.revision > 0) && (
+          <section className="live-simulation-panel" aria-label="Live simulation status">
+            <div>
+              <strong>
+                <span className={running ? 'live-dot running' : 'live-dot'} />
+                {running
+                  ? 'Live simulation running'
+                  : live || autoRefresh
+                    ? 'Simulation paused for review'
+                    : 'Simulation paused'}
+              </strong>
+              <p>
+                Fictional events only ·{' '}
+                {live ? 'Demo day view' : 'Selected reporting period retained'} · {live ? '4' : '8'}
+                -second updates when enabled · {updated} · Revision {simulation.revision}
+              </p>
+              <div className="simulation-actions">
+                <Button size="small" onClick={exportSummary}>
+                  Quick summary CSV
+                </Button>
+                {savedRange && (
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      setLive(false);
+                      setRange(savedRange);
+                      setDraftFrom(parseISO(savedRange.from));
+                      setDraftTo(parseISO(savedRange.to));
+                      setPreset(null);
+                      setSavedRange(null);
+                    }}
+                  >
+                    Return to report period
+                  </Button>
+                )}
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setLive(false);
+                    setAutoRefresh(false);
+                    setSavedRange(null);
+                    setSimulation(initialSimulation());
+                    changePreset(3);
+                    setToast('Simulation reset to the original fictional records.');
+                  }}
+                >
+                  Reset simulation
+                </Button>
+              </div>
+            </div>
+            <ol
+              className="live-event-feed"
+              aria-label="Recent simulated activity"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {simulation.events
+                .filter((event) => event.customerId === customerId)
+                .slice(0, 3)
+                .map((event) => (
+                  <li key={event.id}>
+                    <time>{event.time.slice(11, 16)} UTC</time>
+                    <span>{event.text}</span>
+                  </li>
+                ))}
+              {!simulation.events.some((event) => event.customerId === customerId) && (
+                <li>Waiting for the next fictional event…</li>
+              )}
+            </ol>
+          </section>
+        )}
         <div
           role="tabpanel"
           id={`panel-${tab}`}
@@ -717,6 +999,20 @@ export default function App() {
                 <Info text="Enabled accounts, recorded engagement and commercial active-user definitions are different measures. This prototype does not implement billing-grade utilisation." />
                 <span>Commercial 365-day active-user definition to be validated separately.</span>
                 <span className="mock-note">Illustrative records only</span>
+              </div>
+              <div className="two-equal growth-row">
+                <Panel
+                  title="Profiles created over time"
+                  subtitle="New profiles by creation timestamp; separate from enabled accounts and engagement."
+                  action={
+                    <Button size="small" onClick={showGrowth}>
+                      View profiles
+                    </Button>
+                  }
+                >
+                  <TimeLines points={points} created />
+                </Panel>
+                {allocationPanel}
               </div>
               <div className="two-columns engagement-row">
                 <Panel
@@ -867,7 +1163,7 @@ export default function App() {
                   variant="outlined"
                   startIcon={<FileDownloadOutlinedIcon />}
                   onClick={() =>
-                    downloadCsv(
+                    downloadSnapshotCsv(
                       file('user-engagement'),
                       csvRows(data.users, userColumns),
                       userColumns.map((c) => c.headerName!),
@@ -878,6 +1174,7 @@ export default function App() {
                 </Button>
               </div>
               <div className="metrics four-metrics">
+                <MetricCard metric={metrics.created} />
                 <MetricCard metric={metrics.enabled} />
                 <MetricCard
                   metric={{
@@ -934,6 +1231,17 @@ export default function App() {
                   }}
                 />
               </div>
+              {allocationPanel}
+              <Records
+                key={`${customer.id}-created`}
+                title="Profiles created in selected period"
+                subtitle="Creation does not establish engagement or commercial billing."
+                rows={data.created}
+                columns={profileColumns}
+                filename={file('profiles-created')}
+                filterField="creationSource"
+                choices={['HR import', 'Portal', 'SSO provisioning', 'Travel import']}
+              />
               <div className="two-equal">
                 <Panel
                   title="Platform engagement"
@@ -988,6 +1296,13 @@ export default function App() {
                   )
                 }
               />
+              <UsageConcepts
+                key={`${customerId}-user-concepts`}
+                customer={customer}
+                range={range}
+                asOf={simulation.now}
+                mode="users"
+              />
             </>
           )}
           {tab === 2 && (
@@ -1003,7 +1318,7 @@ export default function App() {
                   variant="outlined"
                   startIcon={<FileDownloadOutlinedIcon />}
                   onClick={() =>
-                    downloadCsv(
+                    downloadSnapshotCsv(
                       file('travel'),
                       csvRows(data.trips, tripColumns),
                       tripColumns.map((c) => c.headerName!),
@@ -1109,6 +1424,16 @@ export default function App() {
                 choices={['Low', 'Moderate', 'High', 'Severe']}
                 filterField="risk"
               />
+              <Records
+                key={`${customer.id}-ingestions`}
+                title="Accepted PNR ingestions"
+                subtitle="Accepted feed records by receipt date. Updates can refer to an existing booking; this is separate from trip counts by travel start date."
+                rows={data.ingestions}
+                columns={ingestionColumns}
+                filename={file('pnr-ingestions')}
+                filterField="provider"
+                choices={[...new Set(data.ingestions.map((i) => i.provider))]}
+              />
             </>
           )}
           {tab === 3 && (
@@ -1124,7 +1449,7 @@ export default function App() {
                   variant="outlined"
                   startIcon={<FileDownloadOutlinedIcon />}
                   onClick={() => {
-                    downloadCsv(
+                    downloadSnapshotCsv(
                       file('safety'),
                       [
                         ...csvRows(data.checkins, checkColumns).map((r) => ({
@@ -1132,6 +1457,10 @@ export default function App() {
                           ...r,
                         })),
                         ...csvRows(data.sos, sosColumns).map((r) => ({ Record: 'SOS', ...r })),
+                        ...csvRows(data.receivedCheckins, receivedColumns).map((r) => ({
+                          Record: 'Received check-in',
+                          ...r,
+                        })),
                         ...csvRows(alertRows(data), alertColumns).map((r) => ({
                           Record: 'Alert',
                           ...r,
@@ -1161,7 +1490,24 @@ export default function App() {
               </div>
               <div className="metrics five-metrics">
                 {[
-                  operations[0],
+                  { ...operations[0], label: 'Check-in requests sent' },
+                  {
+                    id: 'received',
+                    label: 'Check-ins received',
+                    value: data.receivedCheckins.length,
+                    icon: <CheckCircleOutlineIcon />,
+                    note: 'Counted by receipt time',
+                    definition:
+                      'Received check-in events in the period, including scheduled responses and traveller-initiated check-ins. Separate from request-cohort response rate.',
+                    onClick: () =>
+                      openRecords(
+                        'Received check-ins',
+                        'Counted by receipt time. A received check-in can be unscheduled; request-cohort completions are counted separately.',
+                        data.receivedCheckins,
+                        receivedColumns,
+                        'received-checkins',
+                      ),
+                  },
                   operations[3],
                   operations[1],
                   operations[2],
@@ -1249,6 +1595,17 @@ export default function App() {
                   choices={['Completed', 'Missed', 'Pending']}
                 />
               )}
+              {safetyTab === 0 && (
+                <Records
+                  title="Received check-ins"
+                  subtitle="Receipt-time cohort, including traveller-initiated check-ins without a request. This count need not equal completed requests in the request-date cohort."
+                  rows={data.receivedCheckins}
+                  columns={receivedColumns}
+                  filename={file('received-checkins')}
+                  filterField="source"
+                  choices={['Scheduled response', 'Traveller-initiated']}
+                />
+              )}
               {safetyTab === 1 && (
                 <Records
                   key={`${customer.id}-sos`}
@@ -1262,7 +1619,7 @@ export default function App() {
                 <Records
                   key={`${customer.id}-alerts`}
                   title="Alert records"
-                  subtitle="Select an alert to inspect its recipient receipts."
+                  subtitle="Search risk, channel, targeting context or recipient email. Select an alert to inspect recipient receipts."
                   rows={alertRows(data)}
                   columns={alertColumns}
                   filename={file('alerts')}
@@ -1271,6 +1628,13 @@ export default function App() {
                   onRow={showRecipients}
                 />
               )}
+              <UsageConcepts
+                key={`${customerId}-safety-concepts`}
+                customer={customer}
+                range={range}
+                asOf={simulation.now}
+                mode="safety"
+              />
             </>
           )}
           {tab === 4 && (
@@ -1300,7 +1664,7 @@ export default function App() {
                 <Button
                   variant="outlined"
                   onClick={() =>
-                    downloadCsv(
+                    downloadSnapshotCsv(
                       file('integrations'),
                       customer.integrations.map((i) => ({
                         Provider: i.provider,
@@ -1390,6 +1754,11 @@ export default function App() {
                   </Paper>
                 ))}
               </div>
+              <IntegrationRegister
+                customers={simulation.customers}
+                customerId={customerId}
+                onEditing={setEditingContact}
+              />
               <div className="definition-banner">
                 <Info text="Configuration records do not prove a live connection or feed health. This is a fabricated snapshot at 07 Oct 2026, independent of selected dates." />
                 <span>
@@ -1402,7 +1771,7 @@ export default function App() {
         </div>
         <footer>
           <span>Serenity Local / HULA · Client Engagement</span>
-          <span>Event POC · All data fictional · Snapshot 07 Oct 2026</span>
+          <span>Event POC · All data fictional · Baseline 07 Oct 2026</span>
         </footer>
       </main>
       <Drawer
@@ -1437,15 +1806,17 @@ export default function App() {
             </div>
             <div className="drawer-content">
               {detail.rows && detail.columns ? (
-                <Records
-                  key={detail.title}
-                  title="Supporting records"
-                  subtitle="Search, sort, filter and export the mock receipts."
-                  rows={detail.rows}
-                  columns={detail.columns}
-                  filename={detail.filename || file('records')}
-                  onRow={detail.onRow}
-                />
+                <ExportContext.Provider value={detail.scope || exportScope}>
+                  <Records
+                    key={detail.title}
+                    title="Supporting records"
+                    subtitle="Search, sort, filter and export the mock receipts."
+                    rows={detail.rows}
+                    columns={detail.columns}
+                    filename={detail.filename || file('records')}
+                    onRow={detail.onRow}
+                  />
+                </ExportContext.Provider>
               ) : (
                 detail.content
               )}
@@ -1525,6 +1896,27 @@ export default function App() {
           </Button>
         </div>
       </Drawer>
+      {reportSnapshot && (
+        <ReportCenter
+          snapshot={reportSnapshot}
+          onClose={() => setReportSnapshot(null)}
+          onPreview={(schedule) => {
+            const target = simulation.customers.find((c) => c.id === schedule.customerId);
+            if (target) {
+              const stored = allocations[target.id];
+              setReportSnapshot(
+                captureReport(
+                  target,
+                  { from: schedule.from, to: schedule.to },
+                  simulation.now,
+                  simulation.revision,
+                  stored ? stored.limit : target.limit,
+                ),
+              );
+            }
+          }}
+        />
+      )}
       <Snackbar
         open={!!toast}
         autoHideDuration={4000}
@@ -1541,7 +1933,7 @@ export default function App() {
           </IconButton>
         }
       />
-    </>
+    </ExportContext.Provider>
   );
 }
 function formatDate(date: Date) {

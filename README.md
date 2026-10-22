@@ -48,7 +48,17 @@ No map key, paid service, geocoding or external map requests are used. The map u
 - **Globex International:** strong travel usage with lower recorded mobile adoption.
 - **Northstar Energy:** lower engagement, more observed dormancy and greater illustrative higher-risk travel exposure.
 
-The fixed fictional snapshot ends on 07 Oct 2026. Enabled accounts are a current snapshot, not a historical or commercial active-user measure. Engagement reflects recorded activity; mobile engagement is not proof of an installed app. Check-in response rate is completed / all requested, including pending and missed. Recorded alert sends do not establish delivery or reading. Commercial 365-day active-user criteria remain to be validated separately.
+The fictional baseline ends on 07 Oct 2026. **Live** starts simulated demo-day activity every four seconds; **Pause live** freezes that view, and **Return to report period** restores the earlier date selection. **Auto-refresh** generates updates every eight seconds while preserving the reporting range. **Refresh** adds one fictional event immediately. Data-as-of and the event feed identify the demo clock; no real data is fetched. Opening receipts or the report studio pauses updates. Reset simulation restores the original events, and reloading resets the in-memory event stream.
+
+**Profiles created** has its own creation-date trend, receipts and exports. Account status/allocation shows enabled and disabled accounts, remaining capacity, configured overage and an editable near-limit threshold. Mock allocation settings are saved locally. Enabled accounts remain a current snapshot, without a historical enabled-account trend or a commercial active-user claim.
+
+Safety separates sent check-in requests from received check-ins, including unscheduled receipts. Response rate remains completed / all requests in the request-date cohort. Alerts include channel, targeting context and searchable recipient evidence without delivery/read claims. Travel separates accepted PNR ingestion records from itineraries by start date. The integration register supports local fictional owner/contact notes and provider lookup across the three mock customers.
+
+Expandable sections in Users and Safety & Alerts cover the additional concepts: current fictional live-location preferences and separate reporting observations, recorded welcome-email sends with a 30-day follow-up cohort, app call actions without answer/outcome claims, non-alert messages and recipient sends, and mock support/Ops tickets by tier and type. Each has searchable/exportable records from its own fabricated source. No external support, telephony, location or messaging service is connected.
+
+**Export Report** opens the report studio with a frozen snapshot, CSV and JSON downloads, chart previews and **Print / save PDF** through the browser's print dialog. Mock schedules save their customer, fixed dates, section, example recipient, cadence and timezone; they can be previewed, paused or removed. No emails or background delivery jobs run. Layout, allocation, integration-note and schedule settings can persist in browser localStorage. All stored content is for fictional demonstration only.
+
+Engagement reflects recorded web/mobile activity; mobile engagement is not proof of an installed app. PNR receipt evidence is shown separately. Commercial 365-day active-user criteria remain to be validated separately. See [data and refresh design](DATA_DESIGN.md) for metric boundaries, snapshot exports and the proposed production reporting approach.
 
 ## GitHub Pages
 

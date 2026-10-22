@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useContext, useState, type ReactNode } from 'react';
 import {
   Box,
   Button,
@@ -30,6 +30,7 @@ import { PieChart } from '@mui/x-charts/PieChart';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { fmtDate, n, type Selected, type Risk } from './data';
 import { downloadCsv, type CsvRow } from './export';
+import { ExportContext, withExportScope } from './reporting';
 
 export const colours = ['#9e6b1f', '#486f83', '#779489', '#a8b0b2', '#ba8873', '#7b6d83'];
 export const riskColours: Record<Risk, string> = {
@@ -267,6 +268,7 @@ export function TimeLines({
   points,
   travel = false,
   alerts = false,
+  created = false,
 }: {
   points: Array<{
     label: string;
@@ -277,21 +279,26 @@ export function TimeLines({
     mobile: number;
     trips: number;
     sends: number;
+    created?: number;
   }>;
   travel?: boolean;
   alerts?: boolean;
+  created?: boolean;
 }) {
-  const keys: Array<'engaged' | 'mobile' | 'web' | 'trips' | 'sends'> = travel
-    ? ['trips']
-    : alerts
-      ? ['sends']
-      : ['engaged', 'mobile', 'web'];
+  const keys: Array<'engaged' | 'mobile' | 'web' | 'trips' | 'sends' | 'created'> = created
+    ? ['created']
+    : travel
+      ? ['trips']
+      : alerts
+        ? ['sends']
+        : ['engaged', 'mobile', 'web'];
   const labels = {
     web: 'Web users',
     engaged: 'Engaged users',
     mobile: 'Mobile users',
     trips: 'Trips / itineraries',
     sends: 'Recorded alert sends',
+    created: 'Profiles created',
   };
   return (
     <LineChart
@@ -317,17 +324,21 @@ export function TimeLines({
           tickLabelStyle: { fontSize: 11 },
         },
       ]}
-      yAxis={[{ width: 50, min: 0, tickLabelStyle: { fontSize: 11 } }]}
+      yAxis={[{ width: 50, min: 0, tickMinStep: 1, tickLabelStyle: { fontSize: 11 } }]}
       series={keys.map((key, i) => ({
         id: key,
-        data: points.map((p) => p[key]),
+        data: points.map((p) => p[key] || 0),
         label: labels[key],
         color: colours[i],
         curve: 'linear',
-        showMark: false,
+        showMark: points.length === 1,
         area: travel || alerts,
         valueFormatter: (v) =>
-          travel || alerts ? n(v || 0) : `${n(v || 0)} users with recorded activity`,
+          created
+            ? `${n(v || 0)} profiles created in interval`
+            : travel || alerts
+              ? n(v || 0)
+              : `${n(v || 0)} users with recorded activity`,
       }))}
       grid={{ horizontal: true }}
       margin={{ left: 8, right: 20, top: 22, bottom: 8 }}
@@ -385,6 +396,21 @@ export const userColumns: GridColDef[] = [
   { field: 'platform', headerName: 'Platform', width: 150 },
   { field: 'mobile', headerName: 'Registered mobile device', width: 195, type: 'boolean' },
   { field: 'age', headerName: 'Engagement age band', width: 185 },
+  dateColumn('createdAt', 'Profile created', 180),
+  { field: 'creationSource', headerName: 'Creation source', width: 180 },
+  dateColumn('lastEvidence', 'Last recorded evidence (UTC)', 210),
+  { field: 'evidenceSource', headerName: 'Evidence source', width: 220 },
+  dateColumn('lastPnrReceipt', 'Latest PNR receipt (UTC)', 200),
+];
+export const profileColumns: GridColDef[] = [
+  userColumns[0],
+  userColumns[1],
+  dateColumn('createdAt', 'Profile created (UTC)', 190),
+  { field: 'creationSource', headerName: 'Creation source', width: 170 },
+  userColumns[3],
+  userColumns[2],
+  userColumns[4],
+  userColumns[5],
 ];
 export const tripColumns: GridColDef[] = [
   { field: 'traveller', headerName: 'Traveller', width: 180 },
@@ -403,6 +429,7 @@ export const checkColumns: GridColDef[] = [
   dateColumn('completed', 'Completed'),
   statusColumn(),
   { field: 'location', headerName: 'Location', width: 140 },
+  { field: 'email', headerName: 'Email', width: 260 },
 ];
 export const sosColumns: GridColDef[] = [
   { field: 'traveller', headerName: 'Traveller', width: 180 },
@@ -410,6 +437,7 @@ export const sosColumns: GridColDef[] = [
   { field: 'location', headerName: 'Location', width: 145 },
   statusColumn(),
   { field: 'acknowledgement', headerName: 'Acknowledgement', minWidth: 280, flex: 1 },
+  { field: 'email', headerName: 'Email', width: 260 },
 ];
 export const alertColumns: GridColDef[] = [
   { field: 'alert', headerName: 'Alert', minWidth: 280, flex: 1 },
@@ -417,6 +445,10 @@ export const alertColumns: GridColDef[] = [
   { field: 'type', headerName: 'Type', width: 145 },
   { field: 'recipientCount', headerName: 'Recipients / sends', width: 160, type: 'number' },
   dateColumn('date', 'Date/time'),
+  { field: 'channel', headerName: 'Channel', width: 120 },
+  { field: 'targeting', headerName: 'Targeting context', width: 190 },
+  { field: 'recipientEvidence', headerName: 'Recipient evidence', width: 280 },
+  { field: 'location', headerName: 'Location', width: 150 },
 ];
 export function csvRows(rows: GridValidRowModel[], columns: GridColDef[]): CsvRow[] {
   return rows.map(
@@ -430,7 +462,16 @@ export function csvRows(rows: GridValidRowModel[], columns: GridColDef[]): CsvRo
   );
 }
 export const alertRows = (data: Selected) =>
-  data.alerts.map((a) => ({ ...a, recipientCount: a.recipients.length }));
+  data.alerts.map((a) => ({
+    ...a,
+    recipientCount: a.recipients.length,
+    recipientEvidence: a.recipients
+      .map((id) => {
+        const user = data.users.find((u) => u.id === id);
+        return user ? `${user.name} <${user.email}>` : 'No recorded evidence';
+      })
+      .join('; '),
+  }));
 export function Records({
   title,
   subtitle,
@@ -455,6 +496,7 @@ export function Records({
   onRow?: (row: GridValidRowModel) => void;
 }) {
   const apiRef = useGridApiRef();
+  const exportScope = useContext(ExportContext);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState(initialFilter || 'All');
   const filtered = rows.filter(
@@ -473,8 +515,26 @@ export function Records({
       .filter(Boolean) as GridValidRowModel[];
     downloadCsv(
       filename,
-      csvRows(visibleRows, columns),
-      columns.map((c) => c.headerName || c.field),
+      exportScope
+        ? withExportScope(csvRows(visibleRows, columns), {
+            ...exportScope,
+            definition: `${title}. ${subtitle || 'Filtered supporting records.'}`,
+          })
+        : csvRows(visibleRows, columns),
+      [
+        ...columns.map((c) => c.headerName || c.field),
+        ...(exportScope
+          ? [
+              'Report customer',
+              'Period from (inclusive)',
+              'Period to (inclusive)',
+              'Data as of (UTC)',
+              'Snapshot ID',
+              'Metric definition',
+              'Classification',
+            ]
+          : []),
+      ],
     );
   };
   return (
