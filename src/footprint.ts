@@ -11,7 +11,7 @@ import {
 
 // Approximate public city centres, used only to position fabricated records.
 // No geocoding or device-location service is used.
-const places: Record<string, { country: string; lat: number; lng: number }> = {
+export const places: Record<string, { country: string; lat: number; lng: number }> = {
   Manchester: { country: 'United Kingdom', lat: 53.48, lng: -2.24 },
   Amsterdam: { country: 'Netherlands', lat: 52.37, lng: 4.9 },
   Aberdeen: { country: 'United Kingdom', lat: 57.15, lng: -2.09 },

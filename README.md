@@ -1,25 +1,21 @@
 # AM Dashboard Prototype
 
-Interactive client engagement and account-management dashboard concept, built with React, TypeScript, Vite and Material UI. **Serenity Local / HULA** is fictional branding. This project is intended solely as a UX/product prototype.
-
-All customers, users, events, travel records, integrations and metrics are fictional. There is no backend, authentication or telemetry. No customer or provider APIs are called and no real customer information is included. The interactive map uses bundled world geography; all dashboard records and location summaries are computed locally, with no external map requests.
+Interactive client engagement and account-management concept built with React, TypeScript, Vite and Material UI. **Serenity Local / HULA** is fictional branding. All customers, users, events, integrations, alerts, locations and metrics are fabricated. This is solely a UX/product prototype: no backend, authentication, customer/provider APIs or real customer information.
 
 [Live demo](https://richardhanney.github.io/am-dashboard-poc/)
 
-![Acme Corporation overview](screenshots/refinement-overview.jpg)
+![Fictional customer overview](screenshots/refinement-overview.jpg)
 
-## Local setup
+## Local development
 
-Requires Node 22.13+ or Node 24+ and npm; Node 24 is used for deployment.
+Use Node 22.13+ or Node 24+ (deployment uses Node 24).
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite, normally `http://127.0.0.1:5173/`.
-
-## Validation and production build
+Open the Vite URL, normally `http://127.0.0.1:5173/`.
 
 ```sh
 npm run lint
@@ -28,42 +24,28 @@ npm run build
 npm run preview
 ```
 
-The static output is in `dist/`. Preview is normally available at `http://127.0.0.1:4173/am-dashboard-poc/`. The production base defaults to `/am-dashboard-poc/` and can be configured with `PAGES_BASE_PATH`.
+The static build is in `dist/`. Preview uses `/am-dashboard-poc/`. Set `PAGES_BASE_PATH` to override that production base.
 
-## Explore the prototype
+## Explore
 
-The five tabs cover Overview, Users, Travel, Safety & Alerts and Integrations. Switch customers or dates, open metric receipt drawers, search/filter records and download CSV reports. Overview cards can be hidden or reordered, with layout preferences saved in browser localStorage. The sidebar celebration button fires local confetti; reduced-motion preferences are respected.
+- **General Overview:** searchable and sortable customers requiring an engagement review. Select a customer from the table or dropdown.
+- **Customer health:** latest 90-day recorded engagement among current enabled accounts. Set a per-customer 0–100% threshold with one decimal place. Healthy means strictly above the threshold; zero enabled accounts is not assessable. Overrides last for this session only and are independent of reporting dates.
+- **Overview:** add any card, chart, table or map from the source tabs. Remove cards individually, drag their handles, or press Space, arrow keys and Space to reorder with the keyboard. Reset restores the defaults. Layout alone is saved in localStorage, including an intentionally empty layout.
+- **Users, Travel, Safety & Alerts, Integrations:** the same widget renderers and data are used on their source tabs and Overview. Customer/date selection updates all applicable widgets. Current account snapshots stay independent of historical dates.
+- **Supporting records:** separate metric definitions and evidence dialogs; searchable, sortable and paginated tables. CSV exports contain the displayed page, plus fictional customer/date/definition metadata. Chart points open the corresponding day or category's supporting records.
+- **Traveller footprint:** bundled world map, origin-country selection, journey links, country bubbles, clustering, timeline playback, spotlight, ranked location search and receipts. Country selection narrows the journey cohort; switching link visibility retains that filter. Clear country restores the global cohort. Positions are approximate public city centres, not live traveller positions; links are illustrative, not flight paths.
+- **Alerts near customer assets:** fictional proximity evidence, risk/category filters, density shading, location clusters, coverage counts and supporting records. Unmapped alerts remain in totals and records. Proximity does not imply delivery or harm.
 
-Overview's **Traveller footprint** is a full-width explorer built with Leaflet. Switch between destinations, illustrative risk exposure and recorded safety activity. With **Journey links** on, click any country or bubble to show only journeys originating there without changing the map zoom or position. The origin country is gold and its destination countries are teal; **Show all journeys** clears this focus. Location-list and next/previous controls also select countries without moving the map. Country bubbles remain available after selection, count destination trips before origin filtering, and never combine different countries. Nearby bubbles are separated with small leader lines so they remain clickable. Origin means the recorded itinerary start location, not traveller residence or nationality. With Journey links off, country/location controls explore destinations and grouped circles zoom into nearby locations. Recent journeys and clickable metric receipts explain the selected location. Destination rankings and region charts also remain available in Travel.
+The baseline ends on **07 October 2026**. Refresh recomputes the fixed fictional view locally; it does not fetch or simulate new events. This dashboard follows a source-tab/widget-catalogue experience; the earlier standalone Live and report-studio controls are not part of the current page. Existing simulation/reporting model helpers remain covered by their contract tests.
 
-Fabricated journeys depart from varied countries while retaining each scenario's trip totals and destination mix. Empty selections explain departures versus arrivals in the side panel, leaving the map unobstructed. **Reset map** sits beside the zoom controls at the map's bottom-left; it restores the view and clears country selection while retaining the map's time/risk filters.
+The scenarios remain Acme Corporation (healthy engagement and substantial travel), Globex International (strong travel with weaker mobile adoption), and Northstar Energy (lower engagement and more illustrative higher-risk travel). Email addresses use `example.com`. The sidebar retains the local confetti button and the supplied help-panel easter egg.
 
-Use the eight-interval time scrubber or play/pause to explore recorded activity through the selected date range. **Whole period** restores the full range. Risk chips filter the explorer by exact trip risk, including a combined high/severe option. Time, risk and origin-country filters apply only to the map, spotlight and its supporting records; the headline dashboard cards retain the global customer/date selection. Safety metrics remain location records and are not attributed to a journey origin. Origin focus is suspended in Safety activity or with Journey links off. Playback pauses when a supporting-record drawer opens, and resets when the global customer/date selection changes.
+All map geography, fonts and icons are bundled. No external tiles, geocoding, map API keys or paid services are used. See [geography provenance](src/assets/README.md).
 
-Map positions are approximate public city centres, not current traveller locations. Journey curves are illustrative links between recorded itinerary endpoints, not actual flight paths. Trips use itinerary start dates, check-ins use request dates, and SOS uses record time. Circle numbers count trips or check-in + SOS records, depending on view. Risk colours reflect the highest illustrative trip risk at each location. Distinct travellers are deduplicated within a destination; destination traveller counts must not be summed into an account total.
-
-No map key, paid service, geocoding or external map requests are used. The map uses bundled public-domain Natural Earth outlines. It supports zooming, panning, country/destination selection, journey links and timeline playback; it does not provide street-level road detail. See [basemap provenance](src/assets/README.md).
-
-- **Acme Corporation:** healthy engagement, substantial travel and a configured user limit approaching capacity.
-- **Globex International:** strong travel usage with lower recorded mobile adoption.
-- **Northstar Energy:** lower engagement, more observed dormancy and greater illustrative higher-risk travel exposure.
-
-The fictional baseline ends on 07 Oct 2026. **Live** starts simulated demo-day activity every four seconds; **Pause live** freezes that view, and **Return to report period** restores the earlier date selection. **Auto-refresh** generates updates every eight seconds while preserving the reporting range. **Refresh** adds one fictional event immediately. Data-as-of and the event feed identify the demo clock; no real data is fetched. Opening receipts or the report studio pauses updates. Reset simulation restores the original events, and reloading resets the in-memory event stream.
-
-**Profiles created** has its own creation-date trend, receipts and exports. Account status/allocation shows enabled and disabled accounts, remaining capacity, configured overage and an editable near-limit threshold. Mock allocation settings are saved locally. Enabled accounts remain a current snapshot, without a historical enabled-account trend or a commercial active-user claim.
-
-Safety separates sent check-in requests from received check-ins, including unscheduled receipts. Response rate remains completed / all requests in the request-date cohort. Alerts include channel, targeting context and searchable recipient evidence without delivery/read claims. Travel separates accepted PNR ingestion records from itineraries by start date. The integration register supports local fictional owner/contact notes and provider lookup across the three mock customers.
-
-Expandable sections in Users and Safety & Alerts cover the additional concepts: current fictional live-location preferences and separate reporting observations, recorded welcome-email sends with a 30-day follow-up cohort, app call actions without answer/outcome claims, non-alert messages and recipient sends, and mock support/Ops tickets by tier and type. Each has searchable/exportable records from its own fabricated source. No external support, telephony, location or messaging service is connected.
-
-**Export Report** opens the report studio with a frozen snapshot, CSV and JSON downloads, chart previews and **Print / save PDF** through the browser's print dialog. Mock schedules save their customer, fixed dates, section, example recipient, cadence and timezone; they can be previewed, paused or removed. No emails or background delivery jobs run. Layout, allocation, integration-note and schedule settings can persist in browser localStorage. All stored content is for fictional demonstration only.
-
-Engagement reflects recorded web/mobile activity; mobile engagement is not proof of an installed app. PNR receipt evidence is shown separately. Commercial 365-day active-user criteria remain to be validated separately. See [data and refresh design](DATA_DESIGN.md) for metric boundaries, snapshot exports and the proposed production reporting approach.
+Commercial 365-day active-user criteria remain to be validated separately. Current enabled/disabled accounts and configured capacity are not invoicing or purchased-licence measures. Mobile engagement is not proof of an installed app. Recorded alert sends do not establish delivery or reading.
 
 ## GitHub Pages
 
-Every push to **main** automatically builds and deploys the site through GitHub Actions. In repository Settings → Pages, choose **GitHub Actions**. To redeploy manually, run **Deploy mock dashboard to GitHub Pages** from the Actions tab on `main`.
+Pushes to **main** automatically run the official Pages workflow: Node 24, `npm ci`, lint, tests, static build, upload `dist/`, deploy. Manual deployment is also supported in Actions. Repository Settings → Pages must use **GitHub Actions**. Tabs use local state and require no server routing.
 
-The workflow uses GitHub's official actions, Node 24, `npm ci`, lint, tests and the static build, then uploads `dist/` and deploys it to Pages. It sets the repository base path automatically. Tabs use local React state, so no server routing is required. Fonts, icons and the original SVG wordmark are bundled locally.
-
-See [validation notes](VALIDATION.md) and [design notes](DESIGN_REFERENCES.md). No licence has been added to this prototype repository.
+No licence has been added. See [validation](VALIDATION.md), [data design](DATA_DESIGN.md) and [design notes](DESIGN_REFERENCES.md).

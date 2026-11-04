@@ -68,7 +68,7 @@ export default function TravellerFootprint({ data, range, onReceipts, onTravel }
   const interval = windowIndex === null ? null : windows[windowIndex];
   const activeRisk = view === 'risk' ? risk : 'all';
   const journeyMode = showLinks && view !== 'safety';
-  const activeOrigin = journeyMode ? originCountry : null;
+  const activeOrigin = view !== 'safety' ? originCountry : null;
   const periodData = useMemo(
     () => sliceFootprint(data, interval, activeRisk),
     [data, interval, activeRisk],
@@ -97,7 +97,7 @@ export default function TravellerFootprint({ data, range, onReceipts, onTravel }
   );
   const selected = visiblePoints.find((point) => point.location === location) || visiblePoints[0];
   // Keep every country available for successive clicks, including empty-origin selections.
-  const explorationPoints = journeyMode ? framePoints : visiblePoints;
+  const explorationPoints = journeyMode && !activeOrigin ? framePoints : visiblePoints;
   const ranked = explorationPoints.filter((point) =>
     `${point.location} ${point.country}`.toLowerCase().includes(search.toLowerCase()),
   );
@@ -230,7 +230,7 @@ export default function TravellerFootprint({ data, range, onReceipts, onTravel }
         } else focusPoint(entries[0]);
       };
       const style = {
-        color: highlighted ? '#9e6b1f' : isDestination ? '#486f83' : '#c1cbc7',
+        color: highlighted ? '#007dbb' : isDestination ? '#486f83' : '#c1cbc7',
         weight: highlighted ? 2 : isDestination ? 1.4 : 0.7,
         fillColor: highlighted
           ? '#e2c88f'
@@ -305,7 +305,7 @@ export default function TravellerFootprint({ data, range, onReceipts, onTravel }
           activeOrigin && link.destination !== selected?.location
             ? '#486f83'
             : highlighted
-              ? '#9e6b1f'
+              ? '#007dbb'
               : '#486f83',
         weight: highlighted ? 2.5 : 1.2,
         opacity: highlighted ? 0.9 : 0.3,
@@ -389,7 +389,7 @@ export default function TravellerFootprint({ data, range, onReceipts, onTravel }
                 ? group.some((point) => point.sos.length)
                   ? '#9a4e50'
                   : '#486f83'
-                : '#9e6b1f';
+                : '#007dbb';
         const names = group.map((point) => point.location).join(', ');
         const label = journeyMode
           ? `Show journeys from ${group[0].country}. ${n(total)} destination ${total === 1 ? 'trip' : 'trips'} in this country.`
@@ -540,7 +540,7 @@ export default function TravellerFootprint({ data, range, onReceipts, onTravel }
       title="Traveller footprint"
       subtitle="Follow the journeys. Explore the exposure. Open the evidence."
       action={
-        <Info text="Fictional itinerary destinations and safety records at approximate city centres, not live traveller positions. With Journey links on, countries, bubbles and location controls select the recorded itinerary origin country without moving the map, show only its outgoing journeys and highlight their destination countries. Bubbles remain available for switching countries and count destination trips before origin filtering, not outgoing trips. Origin is not a traveller's home country or nationality. Country shading is not nationwide risk. Safety metrics are location records, not evidence of which journey they belong to. Timeline, origin and risk filters apply only to this explorer; headline cards retain the full selected period." />
+        <Info text="Fictional itinerary destinations and safety records at approximate city centres, not live traveller positions. Countries, bubbles and location controls select the recorded itinerary origin country without moving the map, show only its outgoing journeys and highlight their destination countries. Bubbles remain available for switching countries and count destination trips before origin filtering, not outgoing trips. Origin is not a traveller's home country or nationality. Country shading is not nationwide risk. Safety metrics are location records, not evidence of which journey they belong to. Timeline, origin and risk filters apply only to this explorer; headline cards retain the full selected period." />
       }
     >
       <div className="footprint-toolbar">
@@ -585,7 +585,7 @@ export default function TravellerFootprint({ data, range, onReceipts, onTravel }
             : ''}
         </span>
       </div>
-      {journeyMode && (
+      {(journeyMode || activeOrigin) && (
         <div className="footprint-origin-filter" role="status">
           <div>
             <strong>
@@ -611,7 +611,7 @@ export default function TravellerFootprint({ data, range, onReceipts, onTravel }
           </div>
           {activeOrigin && (
             <Button size="small" variant="outlined" onClick={() => setOriginCountry(null)}>
-              Show all journeys
+              Clear country — Global view
             </Button>
           )}
         </div>

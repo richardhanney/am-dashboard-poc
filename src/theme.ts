@@ -1,30 +1,32 @@
 import { createTheme } from '@mui/material/styles';
 import '@mui/x-data-grid/themeAugmentation';
 
+const fieldFontSize = 13;
+
 export const theme = createTheme({
   palette: {
-    primary: { main: '#9e6b1f', dark: '#7c5418' },
+    primary: { main: '#007dbb', dark: '#00496d' },
     secondary: { main: '#102231' },
-    background: { default: '#fafaf9', paper: '#ffffff' },
-    text: { primary: '#172033', secondary: '#626971' },
-    divider: '#e4e4e0',
-    success: { main: '#427768' },
+    background: { default: '#f5f7fb', paper: '#ffffff' },
+    text: { primary: '#172033', secondary: '#5b6476' },
+    divider: '#d7deea',
+    success: { main: '#1b8a5a' },
     warning: { main: '#a27224' },
     error: { main: '#a54e4e' },
     info: { main: '#486f83' },
   },
   typography: {
     fontFamily: "'Inter', sans-serif",
-    fontSize: 13,
-    h1: { fontFamily: "'Lora', serif", fontSize: '2rem', fontWeight: 500 },
-    h2: { fontFamily: "'Lora', serif", fontSize: '1.4rem', fontWeight: 500 },
-    h3: { fontFamily: "'Lora', serif", fontSize: '1.1rem', fontWeight: 500 },
-    body1: { fontSize: '.875rem' },
-    body2: { fontSize: '.8rem' },
+    fontSize: 14,
+    h1: { fontFamily: "'DM Serif Text', serif", fontSize: '2.5rem', fontWeight: 400 },
+    h2: { fontFamily: "'DM Serif Text', serif", fontSize: '2rem', fontWeight: 400 },
+    h3: { fontFamily: "'DM Serif Text', serif", fontSize: '1.75rem', fontWeight: 400 },
+    body1: { fontSize: '.95rem' },
+    body2: { fontSize: '.875rem' },
     button: { textTransform: 'none', fontWeight: 600 },
-    caption: { fontSize: '.72rem' },
+    caption: { fontSize: '.75rem' },
   },
-  shape: { borderRadius: 5 },
+  shape: { borderRadius: 8 },
   spacing: 8,
   breakpoints: { values: { xs: 0, sm: 600, md: 960, lg: 1280, xl: 1600 } },
   components: {
@@ -35,12 +37,14 @@ export const theme = createTheme({
         outlined: { borderColor: '#babcb9', color: '#172033' },
       },
     },
-    MuiIconButton: { styleOverrides: { root: { borderRadius: 5 } } },
+    MuiIconButton: { styleOverrides: { root: { borderRadius: 8 } } },
+    // The floating label and outline legend must use the same base font size.
+    MuiInputLabel: { styleOverrides: { root: { fontSize: fieldFontSize } } },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
           background: '#fff',
-          fontSize: 13,
+          fontSize: fieldFontSize,
           '& .MuiOutlinedInput-notchedOutline': { borderColor: '#cdcfcb' },
         },
       },

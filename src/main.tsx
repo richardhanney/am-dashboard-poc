@@ -7,11 +7,11 @@ import { enGB } from 'date-fns/locale';
 import '@fontsource/inter/latin-400.css';
 import '@fontsource/inter/latin-500.css';
 import '@fontsource/inter/latin-600.css';
-import '@fontsource/lora/latin-400.css';
-import '@fontsource/lora/latin-500.css';
+import '@fontsource/dm-serif-text/latin-400.css';
 import { theme } from './theme';
 import App from './App';
 import './styles.css';
+import './dashboard-parity.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

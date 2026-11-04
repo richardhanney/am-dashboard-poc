@@ -1,38 +1,31 @@
-# Dashboard data and refresh design
+# Fictional dashboard data design
 
-This document describes the browser-only prototype and a proposed future reporting design. It does not establish production capabilities or billing rules.
+The visual design and interaction structure were informed by an existing internal application. This standalone implementation uses its own local fictional model, without internal API clients, authentication, feature flags, internal component libraries or customer records.
 
-## Prototype behaviour
+## Current page
 
-All events and identities are fictional. Baseline data ends on 07 October 2026. Live starts a demo-day view on the simulated clock and records one event every four seconds. Each tick advances that clock by five minutes. Auto-refresh records an event every eight seconds while retaining the selected reporting period. Manual Refresh records one event immediately. These operations use immutable in-memory data, without network requests.
+The page starts with a portfolio health view. Selecting a customer opens the five source tabs. A single widget catalogue drives both Overview and source-tab content; Overview stores only ordered widget IDs in browser localStorage. Old metric-only layouts migrate to the new catalogue. Invalid saved data falls back safely; empty layouts remain empty until cards are added or reset.
 
-Events cycle through profile creation with mobile engagement, portal engagement, itinerary/feed receipt, check-in request, check-in receipt, alert sends, an accepted PNR revision and an acknowledged SOS record. All cards, charts, maps, tables and exports derive from the same customer data. Updates pause while receipts, the report studio, dashboard customisation or a contact editor are open. Pausing retains the current records. Reset simulation restores the baseline for all fictional customers. Reloading the page also resets event data. It preserves local layout preferences, mock allocation settings, integration notes and schedule configurations.
+All metrics, charts, tables and map receipts derive from the same three fictional customers. Refresh retains the fixed mock baseline. Date selection uses inclusive UTC calendar dates, with 1/3/6/12 calendar-month presets, an upper limit of 366 days, and no date later than the mock snapshot. Invalid input hides the customer content until corrected.
+
+Health has a separate latest 90-day window ending at the mock snapshot. The numerator is distinct users with recorded activity who are currently enabled; the denominator is the current enabled-account snapshot. A customer is Healthy only when the unrounded percentage is strictly greater than its threshold. Zero enabled accounts means Not assessable. Thresholds accept complete 0–100 values with one decimal and persist only in page memory.
 
 ## Metric boundaries
 
-- Profiles created use creation timestamps. Earlier activity and recipient evidence are reconciled to those dates. Creation is distinct from engagement and current enabled status.
-- Enabled and disabled accounts are current mutable snapshots, independent of the selected historical period. They have no historical trend line.
-- Configured capacity, headroom and overage are illustrative settings. The commercial 365-day validation notice remains. No invoice or purchased-licence calculation is implemented.
-- Recorded engagement counts distinct users with web or mobile activity. PNR receipt evidence is attributed through the matching booking traveller and is displayed separately; it does not establish user interaction.
-- Check-in requests use request dates. Received check-ins use receipt dates and include unscheduled traveller-initiated records. Response rate uses completed requests divided by all requests in the request-date cohort, including missed and pending requests.
-- Trips use itinerary start dates. Accepted PNR ingestion records use receipt timestamps; a revision can refer to an existing booking without creating another trip.
-- Alert sends count recipient sends; unique recipients are deduplicated separately. Risk, channel and targeting context are illustrative, without delivery/read or physical-impact claims.
-- SOS acknowledgements do not, by themselves, establish a resolved assistance case. Baseline resolved statuses represent separately fabricated case outcomes.
+- Enabled/disabled accounts and configured capacity describe current fictional snapshots. No historical enabled-account series is invented, and no commercial licence rule is implemented.
+- Profiles created use creation dates. Daily profile counts reconcile to period receipts.
+- Recorded engagement uses distinct users with web/mobile activity. Daily users may recur on multiple days; platform counts overlap. Mobile means the distinct iOS/Android union, not an app installation or registration count.
+- Booking creation uses the first accepted ingestion per booking reference; revisions do not add another booking. Traveller trips use itinerary start dates and distinct booking references. These are separate cohorts.
+- Check-in requests use request dates; received check-ins use receipt dates and can be unscheduled. Response rate is completed requests / all requests in the request-date cohort, including pending and missed. Zero requests has no rate.
+- Recorded alert sends count recipient sends; recipients are deduplicated separately. Neither establishes delivery or reading. SOS acknowledgement is separate from case resolution.
+- Alerts-map proximity and asset counts are explicitly fabricated. Public city-centre coordinates are illustrative, with some alerts intentionally unmapped. The density layer weights distinct alerts and location clusters can zoom into nearby cities. Filtered mapped plus unmapped counts reconcile to supporting records.
 
-## Report consistency
+## Exports and storage
 
-Report studio captures an immutable customer/date/data-version snapshot. CSV and JSON exports include the customer, inclusive dates, data-as-of timestamp, snapshot ID, classification and definition. Table exports use that table's filtered/sorted records. Empty CSV exports contain headers only; JSON retains metadata even with no records. Print / save PDF uses the browser's print dialog and includes chart graphics. Printable table previews show the first ten records; CSV/JSON carry the complete section.
+CSV exports contain the displayed, filtered and sorted table page only. They include fictional classification, customer, inclusive dates, snapshot identity and metric definition. All recipient identities use reserved example domains. No records are sent to a server. Only Overview widget IDs are stored by the current page; no customer data or health metrics are persisted.
 
-Schedules save a fixed customer/date scope, report type, example recipient, cadence, timezone and paused flag locally. Preview uses those saved settings with an explicitly captured data version. Nothing is sent and no delivery worker runs. Monthly's next-date preview is an illustrative 30-day offset, not a scheduling contract.
+Earlier simulation, reporting, allocation and additional-usage helpers remain in source and contract tests but are not part of the current reference-style page. No external delivery worker, realtime connection or scheduled report service exists.
 
-## Proposed production implementation
+## Future implementation considerations
 
-Agree metric definitions, tenancy, customer scope, timezone boundaries, retention and commercial rules before implementing any reporting endpoint. Confirm the availability and completeness of source evidence separately.
-
-Use a tenant-scoped reporting model for costly historical aggregates, backed by event records or snapshots where history is required. Serve common summaries through a short-lived cache keyed by authorised scope, customer, reporting dates, filters and metric-definition version. Fetch paginated detail records on demand. Expose both when data was processed and how far the source data is known to be complete.
-
-Start with periodic, conditional refresh for summaries. A recent activity view can later use server push if latency requirements justify it. Incremental refresh must reconcile corrections, deletions, retries, changed timestamps and late-arriving records, using an ordered cursor plus deletion/correction evidence rather than a creation-time filter alone. A moving time window must also expire records that leave it.
-
-Generate exports and their supporting detail from one consistent version or read snapshot. Preserve customer scope, filters, definitions, data-as-of and source watermarks for reproducibility. Do not mix independent aggregate refreshes inside one report. Scheduled delivery requires a separate authorised backend worker, recipient controls and delivery history; these are not provided by a static site.
-
-The expandable messaging, app-call, live-location preference, welcome-email follow-up and support-ticket sections use independent fictional audit sources. Location preference counts describe a current mock snapshot; reporting observations use their own timestamps. Welcome follow-up uses a recorded send-time cohort and subsequent web/mobile activity within 30 days, with open windows identified separately. Call actions do not imply answered calls. Mock ticket case outcomes are separate evidence from SOS acknowledgement. A production implementation still requires source/definition validation for each concept, including historical preference changes, actual call outcomes and external support identity matching.
+Production reporting would require agreed definitions, tenant/customer authorisation, evidence completeness, timezone and retention policy, consistent export snapshots and separately validated commercial rules. Historical aggregates could use a scoped reporting store and cache; paginated receipts could load on demand. Conditional refresh must reconcile corrections, deletions, late-arriving events and moving date windows. These are design considerations, not capabilities of this static prototype.
