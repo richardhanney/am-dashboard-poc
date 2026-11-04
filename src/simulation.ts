@@ -20,11 +20,11 @@ export const demoClock = (now: string) => `${now.slice(0, 16).replace('T', ' ')}
 
 // One immutable update supplies every card, chart, map, receipt and export.
 // Advancing demo time never contacts a service or modifies the baseline fixtures.
-export function advanceSimulation(state: Simulation, customerId: string): Simulation {
+export function advanceSimulation(state: Simulation, customerId: string, at?: string): Simulation {
   const source = state.customers.find((customer) => customer.id === customerId);
   if (!source) return state;
   const tick = state.ticks[customerId] || 0;
-  const now = addMinutes(new Date(state.now), 5).toISOString();
+  const now = at ?? addMinutes(new Date(state.now), 5).toISOString();
   const id = `${customerId}-demo-${tick + 1}`;
   const next = { ...source };
   const user = source.users.at(-1)!;
@@ -34,7 +34,16 @@ export function advanceSimulation(state: Simulation, customerId: string): Simula
     case 0: {
       const created = {
         id,
-        name: `Avery Demo ${tick + 1}`,
+        name: [
+          'Avery Quinn',
+          'Jordan Vale',
+          'Ellis Beckett',
+          'Rowan Finch',
+          'Jamie Arden',
+          'Morgan Wren',
+          'Riley Marlow',
+          'Casey Rowan',
+        ][Math.floor(tick / 8) % 8],
         email: `demo.${customerId}.${tick + 1}@example.com`,
         group: 'Travellers',
         enabled: true,
@@ -143,7 +152,7 @@ export function advanceSimulation(state: Simulation, customerId: string): Simula
           id,
           alert: `Travel advisory · ${trip.destination}`,
           risk: trip.risk,
-          type: 'Travel briefing',
+          type: 'Travel advisory',
           recipients: source.users
             .filter((u) => u.enabled)
             .slice(-3)
@@ -173,10 +182,10 @@ export function advanceSimulation(state: Simulation, customerId: string): Simula
           time: now,
           location: trip.destination,
           status: 'Acknowledged',
-          acknowledgement: 'Fictional assistance acknowledgement; no case outcome inferred',
+          acknowledgement: 'Assistance acknowledged; no case outcome inferred',
         },
       ];
-      text = `${user.name} · fictional SOS record acknowledged`;
+      text = `${user.name} · SOS record acknowledged`;
   }
   return {
     ...state,

@@ -540,7 +540,7 @@ export default function TravellerFootprint({ data, range, onReceipts, onTravel }
       title="Traveller footprint"
       subtitle="Follow the journeys. Explore the exposure. Open the evidence."
       action={
-        <Info text="Fictional itinerary destinations and safety records at approximate city centres, not live traveller positions. Countries, bubbles and location controls select the recorded itinerary origin country without moving the map, show only its outgoing journeys and highlight their destination countries. Bubbles remain available for switching countries and count destination trips before origin filtering, not outgoing trips. Origin is not a traveller's home country or nationality. Country shading is not nationwide risk. Safety metrics are location records, not evidence of which journey they belong to. Timeline, origin and risk filters apply only to this explorer; headline cards retain the full selected period." />
+        <Info text="Itinerary destinations and safety records at approximate city centres, not live traveller positions. Countries, bubbles and location controls select the recorded itinerary origin country without moving the map, show only its outgoing journeys and highlight their destination countries. Bubbles remain available for switching countries and count destination trips before origin filtering, not outgoing trips. Origin is not a traveller's home country or nationality. Country shading is not nationwide risk. Safety metrics are location records, not evidence of which journey they belong to. Timeline, origin and risk filters apply only to this explorer; headline cards retain the full selected period." />
       }
     >
       <div className="footprint-toolbar">
@@ -680,7 +680,7 @@ export default function TravellerFootprint({ data, range, onReceipts, onTravel }
                   : showLinks
                     ? 'Illustrative journey links'
                     : 'Recorded destinations'}
-              <small>Mock data · not live tracking</small>
+              <small>Recorded evidence · not live tracking</small>
             </div>
           </div>
           <div className="footprint-time">
@@ -955,7 +955,7 @@ export default function TravellerFootprint({ data, range, onReceipts, onTravel }
       </div>
       <div className="footprint-footer">
         <Typography variant="caption" color="text.secondary">
-          Fictional records · City-centre positions · Journey links are not flight paths.{' '}
+          City-centre positions · Journey links are not flight paths.{' '}
           {journeyMode
             ? 'Click any country, bubble or location to highlight outgoing journeys without zooming. Bubble counts show destination trips before origin filtering.'
             : 'Click a highlighted country or destination to explore.'}

@@ -1,7 +1,7 @@
 /* Standalone dashboard presentation, implemented against fictional local records. */
 .parity-dashboard {
   margin-left: 60px;
-  padding: 60px 0 0;
+  padding: var(--chrome-height, 60px) 0 0;
   max-width: none;
 }
 .dashboard-banner {
@@ -22,17 +22,33 @@
   gap: 24px;
 }
 .dashboard-filters {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: minmax(240px, 310px) minmax(320px, 390px) minmax(210px, 1fr);
+  grid-template-rows: auto auto auto;
+  column-gap: 16px;
+  row-gap: 12px;
+  align-items: start;
 }
 .customer-column {
+  grid-column: 1;
+  grid-row: 1 / 4;
+  display: grid;
+  grid-template-rows: subgrid;
+  min-width: 0;
+}
+.customer-column > .MuiTextField-root {
+  grid-row: 2;
+}
+.portfolio-filters {
+  display: flex;
+}
+.portfolio-filters .customer-column {
+  display: flex;
   width: 310px;
   max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+}
+.customer-column > .health-control {
+  grid-row: 3;
 }
 .health-control {
   display: flex;
@@ -49,19 +65,45 @@
   min-width: 0;
 }
 .reporting-date-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  grid-column: 2;
+  grid-row: 1 / 4;
+  display: grid;
+  grid-template-rows: subgrid;
+  min-width: 0;
+}
+.reporting-date-controls > .MuiTypography-root {
+  grid-row: 1;
 }
 .date-pickers {
-  display: flex;
-  flex-wrap: wrap;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 .date-pickers .MuiTextField-root {
-  width: 190px;
+  width: 100%;
+  min-width: 0;
+}
+.refresh-controls {
+  grid-column: 3;
+  grid-row: 1 / 4;
+  display: grid;
+  grid-template-rows: subgrid;
+  justify-items: end;
+  min-width: 0;
+}
+.refresh-controls > .MuiButton-root {
+  grid-row: 2;
+  min-height: 36px;
+}
+.refresh-controls > .MuiTypography-root {
+  grid-row: 3;
+  max-width: 300px;
+  text-align: right;
 }
 .range-presets {
+  grid-row: 3;
+  align-self: start;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -144,7 +186,7 @@
   margin-top: 16px;
   min-width: 0;
 }
-.fictional-badge {
+.scope-badge {
   color: #1677b8 !important;
   border-color: #1677b880 !important;
   font-size: 11px !important;
@@ -396,6 +438,19 @@
     grid-column: 1 / -1;
   }
 }
+@media (max-width: 950px) {
+  .dashboard-filters {
+    grid-template-columns: minmax(240px, 310px) minmax(0, 1fr);
+  }
+  .refresh-controls {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+}
 @media (max-width: 900px) {
   .parity-dashboard .footprint-explorer-layout {
     grid-template-columns: minmax(0, 1fr);
@@ -421,12 +476,31 @@
     padding: 16px;
   }
   .parity-dashboard {
-    padding-top: 60px;
+    padding-top: var(--chrome-height, 60px);
   }
   .dashboard-banner h1 {
     font-size: 26px;
   }
+  .dashboard-filters {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    gap: 20px;
+  }
+  .customer-column,
+  .reporting-date-controls,
+  .refresh-controls {
+    grid-column: auto;
+    grid-row: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  .refresh-controls {
+    align-items: flex-end;
+  }
   .date-pickers {
+    grid-template-columns: minmax(0, 1fr);
     width: 100%;
   }
   .date-pickers .MuiTextField-root {
@@ -450,12 +524,12 @@
   z-index: 350;
 }
 
-.fictional-badge {
+.scope-badge {
   max-width: 100%;
   height: auto !important;
   min-height: 24px;
 }
-.fictional-badge .MuiChip-label {
+.scope-badge .MuiChip-label {
   white-space: normal;
   line-height: 1.3;
   padding-top: 3px;

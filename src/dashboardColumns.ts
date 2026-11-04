@@ -3,12 +3,18 @@ export const profileColumns: GridColDef[] = [
   { field: 'name', headerName: 'Name' },
   { field: 'email', headerName: 'Email' },
   { field: 'currentStatus', headerName: 'Current account status' },
+  { field: 'groupMemberships', headerName: 'Current groups' },
+  { field: 'role', headerName: 'Current role' },
+  { field: 'travellerTag', headerName: 'Current traveller tag' },
   { field: 'createdAt', headerName: 'Profile created (UTC)' },
 ];
 export const userColumns: GridColDef[] = [
   { field: 'name', headerName: 'Name' },
   { field: 'email', headerName: 'Email' },
   { field: 'currentStatus', headerName: 'Current account status' },
+  { field: 'groupMemberships', headerName: 'Current groups' },
+  { field: 'role', headerName: 'Current role' },
+  { field: 'travellerTag', headerName: 'Current traveller tag' },
   { field: 'lastActivity', headerName: 'Latest evidence in window (UTC)' },
   { field: 'platforms', headerName: 'Recorded platforms' },
 ];
@@ -26,8 +32,9 @@ export const sosColumns: GridColDef[] = [
   { field: 'email', headerName: 'Email' },
   { field: 'time', headerName: 'Recorded at (UTC)' },
   { field: 'country', headerName: 'Recorded country' },
+  { field: 'status', headerName: 'Acknowledgement status' },
 ];
-export const receivedColumns = sosColumns;
+export const receivedColumns = sosColumns.filter((c) => c.field !== 'status');
 export const nearbyAlertColumns: GridColDef[] = [
   { field: 'alert', headerName: 'Alert' },
   { field: 'date', headerName: 'Created (UTC)' },

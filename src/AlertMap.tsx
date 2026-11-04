@@ -4,38 +4,20 @@ import L from 'leaflet';
 import type { GeoJsonObject } from 'geojson';
 import 'leaflet/dist/leaflet.css';
 import world from './assets/world-countries.json';
-import { buildFootprint } from './footprint';
-import { type Selected } from './data';
-import { alertRows } from './components';
+import { nearbyAlertEvidence } from './evidenceModel';
 
 export default function AlertMap({
-  data,
+  evidence,
   onRecords,
 }: {
-  data: Selected;
-  onRecords: (
-    rows: Array<
-      ReturnType<typeof alertRows>[number] & {
-        coordinates?: { lat: number; lng: number };
-        assets: number;
-      }
-    >,
-  ) => void;
+  evidence: ReturnType<typeof nearbyAlertEvidence>;
+  onRecords: (rows: ReturnType<typeof nearbyAlertEvidence>) => void;
 }) {
   const [risk, setRisk] = useState('All');
   const [category, setCategory] = useState('All');
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
-  const places = useMemo(() => buildFootprint(data).points, [data]);
-  const all = useMemo(
-    () =>
-      alertRows(data).map((row, index) => ({
-        ...row,
-        coordinates: index % 7 === 0 ? undefined : places.find((p) => p.location === row.location),
-        assets: 1 + (index % 3),
-      })),
-    [data, places],
-  );
+  const all = useMemo(() => evidence, [evidence]);
   const filtered = all.filter(
     (a) => (risk === 'All' || a.risk === risk) && (category === 'All' || a.type === category),
   );
@@ -122,7 +104,7 @@ export default function AlertMap({
         const title =
           locationsInGroup.length > 1
             ? `Zoom to ${locationsInGroup.length} alert locations, ${rows.length} alerts`
-            : `View ${rows.length} fictional alerts near ${locationsInGroup[0]}`;
+            : `View ${rows.length} alerts near ${locationsInGroup[0]}`;
         const marker = L.marker([lat, lng], {
           icon: L.divIcon({
             className: 'alert-map-marker',
@@ -216,8 +198,8 @@ export default function AlertMap({
         <span>Higher density · distinct alerts · relative to this view</span>
       </div>
       <Typography variant="caption">
-        Fabricated nearby-asset snapshots only. Proximity does not establish notification delivery
-        or harm. Public city centres, not asset or traveller positions.
+        Nearby-asset snapshots only. Proximity does not establish notification delivery or harm.
+        Public city centres, not asset or traveller positions.
       </Typography>
       <Button className="alert-map-records" variant="outlined" onClick={() => onRecords(filtered)}>
         View supporting alert records

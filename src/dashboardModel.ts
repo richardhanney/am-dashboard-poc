@@ -30,17 +30,17 @@ const entry = (
   current = false,
 ): Widget => ({ id, title, tab, kind, width, definition, current });
 const current =
-  'Current fictional enabled-account snapshot, independent of reporting dates. This is not a commercial active-user or billing measure.';
+  'Current enabled-account snapshot, independent of reporting dates. This is not a commercial active-user or billing measure.';
 const capacity =
   'Illustrative configured capacity. This is not a purchased licence count or an invoicing calculation.';
-const period = 'Fictional records in the selected inclusive UTC reporting period.';
+const period = 'Records in the selected inclusive UTC reporting period.';
 export const dashboardWidgets: Widget[] = [
   entry(
     'alert-map',
     'Alerts near customer assets',
     'safety',
     'alertMap',
-    'Distinct fictional alerts with fabricated nearby-asset evidence, counted by alert creation date. Proximity does not establish delivery, impact or actual harm. Alerts without map coordinates remain in supporting records.',
+    'Distinct alerts with nearby-asset snapshot evidence, counted by alert creation date. Proximity does not establish delivery, impact or actual harm. Alerts without map coordinates remain in supporting records.',
     'full',
   ),
   entry('enabled', 'Enabled accounts', 'users', 'metric', current, 'small', true),
@@ -49,7 +49,7 @@ export const dashboardWidgets: Widget[] = [
     'Disabled accounts',
     'users',
     'metric',
-    'Current fictional disabled-account snapshot. Disabled status is not commercial inactivity.',
+    'Current disabled-account snapshot. Disabled status is not commercial inactivity.',
     'small',
     true,
   ),
@@ -68,7 +68,7 @@ export const dashboardWidgets: Widget[] = [
     'Remaining capacity',
     'users',
     'metric',
-    'Configured limit minus enabled accounts. A negative value indicates configured overage. Illustrative only.',
+    'Configured limit minus enabled accounts, floored at zero. Over-allocation is shown separately. Illustrative only.',
     'small',
     true,
   ),
@@ -86,7 +86,7 @@ export const dashboardWidgets: Widget[] = [
     'Profiles created',
     'users',
     'metric',
-    'Distinct fictional profiles by creation timestamp in the selected period, regardless of current enabled status.',
+    'Distinct profiles by creation timestamp in the selected period, regardless of current enabled status.',
   ),
   entry(
     'engaged',
@@ -121,7 +121,7 @@ export const dashboardWidgets: Widget[] = [
     'Registered mobile users',
     'users',
     'metric',
-    'Fictional mobile registrations recorded by the selected To date; not proof of installation or engagement.',
+    'Mobile registrations recorded by the selected To date; not proof of installation or engagement.',
   ),
   entry(
     'allocation',
@@ -135,7 +135,7 @@ export const dashboardWidgets: Widget[] = [
     'Profiles created over time',
     'users',
     'chart',
-    'Fictional profiles created per UTC calendar day. Select a date to inspect its supporting profiles.',
+    'Profiles created per UTC calendar day. Select a date to inspect its supporting profiles.',
   ),
   entry('profiles-records', 'Profiles created in selected period', 'users', 'records', period),
   entry(
@@ -172,7 +172,7 @@ export const dashboardWidgets: Widget[] = [
     'Recent user activity',
     'users',
     'records',
-    'Latest recorded activity for fictional users in this period.',
+    'Latest recorded activity for users in this period.',
     'wide',
   ),
   entry(
@@ -180,42 +180,42 @@ export const dashboardWidgets: Widget[] = [
     'Bookings created',
     'travel',
     'metric',
-    'Distinct fictional booking references first accepted during the selected period. Revisions do not create another booking; booking ingestion is separate from trip start.',
+    'Distinct booking references first accepted during the selected period. Revisions do not create another booking; booking ingestion is separate from trip start.',
   ),
   entry(
     'trips',
     'Traveller trips',
     'travel',
     'metric',
-    'Distinct mock itinerary booking references starting during the selected period. One itinerary per booking, not per flight segment.',
+    'Distinct itinerary booking references starting during the selected period. One itinerary per booking, not per flight segment.',
   ),
   entry(
     'travellers',
     'Distinct travellers',
     'travel',
     'metric',
-    'Distinct fictional user IDs within the selected trip cohort.',
+    'Distinct user IDs within the selected trip cohort.',
   ),
   entry(
     'countries',
     'Recorded destination countries',
     'travel',
     'metric',
-    'Distinct destination countries in selected fictional itineraries; not proof of physical presence.',
+    'Distinct destination countries in selected itineraries; not proof of physical presence.',
   ),
   entry(
     'higher-risk',
     'Higher-risk trips',
     'travel',
     'metric',
-    'Selected fictional trips with illustrative High or Severe destination risk.',
+    'Selected trips with illustrative High or Severe destination risk.',
   ),
   entry(
     'footprint',
     'Traveller footprint',
     'travel',
     'map',
-    'Fictional itinerary destinations at public city centres. Country, time and risk filters affect this explorer only. Journey links are illustrative, not flight tracks.',
+    'Itinerary destinations at public city centres. Country, time and risk filters affect this explorer only. Journey links are illustrative, not flight tracks.',
     'full',
   ),
   entry(
@@ -223,14 +223,14 @@ export const dashboardWidgets: Widget[] = [
     'Trips over time',
     'travel',
     'chart',
-    'Fictional traveller trips by UTC itinerary start date. Select a date to open its journeys.',
+    'Traveller trips by UTC itinerary start date. Select a date to open its journeys.',
   ),
   entry(
     'destinations',
     'Top destinations',
     'travel',
     'chart',
-    'Selected fictional trips grouped by destination. Select a destination to inspect journeys.',
+    'Selected trips grouped by destination. Select a destination to inspect journeys.',
   ),
   entry('regions', 'Travel by region', 'travel', 'chart', period),
   entry(
@@ -238,7 +238,7 @@ export const dashboardWidgets: Widget[] = [
     'Travel by destination risk',
     'travel',
     'chart',
-    'Illustrative destination risk on selected fictional trips.',
+    'Illustrative destination risk on selected trips.',
   ),
   entry('journeys', 'Traveller journeys', 'travel', 'records', period),
   entry(
@@ -246,28 +246,28 @@ export const dashboardWidgets: Widget[] = [
     'Check-ins received',
     'safety',
     'metric',
-    'Received fictional check-in events by receipt time, including unscheduled check-ins. Separate from requested check-ins and response outcomes.',
+    'Received check-in events by receipt time, including unscheduled check-ins. Separate from requested check-ins and response outcomes.',
   ),
   entry(
     'sos',
     'Recorded SOS events',
     'safety',
     'metric',
-    'Fictional SOS events by record time. An acknowledgement alone does not establish a resolved assistance case.',
+    'SOS events by record time. An acknowledgement alone does not establish a resolved assistance case.',
   ),
   entry(
     'checks',
     'Check-in requests sent',
     'safety',
     'metric',
-    'All fictional requests by request date, including completed, missed and pending.',
+    'All requests by request date, including completed, missed and pending.',
   ),
   entry(
     'alerts',
     'Recorded alert sends',
     'safety',
     'metric',
-    'Sum of fictional recipient sends. No delivery or reading is implied.',
+    'Sum of recipient sends. No delivery or reading is implied.',
   ),
   entry(
     'response',
@@ -281,7 +281,7 @@ export const dashboardWidgets: Widget[] = [
     'Unique alert recipients',
     'safety',
     'metric',
-    'Distinct fictional recipients across recorded alert sends in the period.',
+    'Distinct recipients across recorded alert sends in the period.',
   ),
   entry('alert-trend', 'Recorded alert sends over time', 'safety', 'chart', period),
   entry(
@@ -296,9 +296,9 @@ export const dashboardWidgets: Widget[] = [
     'Alerts by risk',
     'safety',
     'chart',
-    'Distinct fictional alerts by illustrative risk; not recipient sends.',
+    'Distinct alerts by illustrative risk; not recipient sends.',
   ),
-  entry('alert-type', 'Alerts by type', 'safety', 'chart', 'Distinct fictional alerts by type.'),
+  entry('alert-type', 'Alerts by type', 'safety', 'chart', 'Distinct alerts by type.'),
   entry('check-records', 'Check-in requests', 'safety', 'records', period),
   entry('received-records', 'Check-ins received records', 'safety', 'records', period),
   entry('sos-records', 'SOS records', 'safety', 'records', period),
@@ -309,7 +309,7 @@ export const dashboardWidgets: Widget[] = [
     'Client integrations',
     'integrations',
     'records',
-    'Fictional provider configuration and observed feed evidence. No connection is made.',
+    'Provider configuration and observed feed evidence. No connection is made.',
   ),
   ...(['TMC', 'SSO', 'HR'] as const).map((type) =>
     entry(
@@ -317,7 +317,7 @@ export const dashboardWidgets: Widget[] = [
       `${type} integration`,
       'integrations',
       'integration',
-      'Fictional provider configuration; no operational health claim.',
+      'Provider configuration; no operational health claim.',
     ),
   ),
   entry(
@@ -329,6 +329,89 @@ export const dashboardWidgets: Widget[] = [
     'wide',
   ),
 ];
+dashboardWidgets.push(
+  entry(
+    'briefings',
+    'Pre-travel briefings sent',
+    'travel',
+    'metric',
+    'Recorded email send audits typed as pre-travel briefings, counted by send time. Reminders are separate. No delivery/read inference.',
+  ),
+  entry(
+    'briefing-trend',
+    'Briefing sends over time',
+    'travel',
+    'chart',
+    'Recorded pre-travel briefing sends by UTC date; reminders excluded.',
+  ),
+  entry(
+    'briefing-records',
+    'Pre-travel briefing records',
+    'travel',
+    'records',
+    'Briefing and reminder audits with traveller/recipient, itinerary/booking and explicit acknowledgement evidence.',
+  ),
+  entry(
+    'facilities-count',
+    'Current facilities',
+    'safety',
+    'metric',
+    'Current non-deleted facilities. Account-wide; independent of dates and user filters.',
+    'small',
+    true,
+  ),
+  entry(
+    'facilities',
+    'Facilities',
+    'safety',
+    'records',
+    'Current customer facilities, optional map position and based users. Account-wide; no historical facility-state reconstruction.',
+  ),
+  entry(
+    'geofences-count',
+    'Configured geofences',
+    'safety',
+    'metric',
+    'Current geofence geometry/configuration. Account-wide, independent of reporting dates.',
+    'small',
+    true,
+  ),
+  entry(
+    'geofences',
+    'Geofences',
+    'safety',
+    'records',
+    'Current circle/polygon geometry and enabled state. Configuration does not prove a transition or notification send.',
+  ),
+  entry(
+    'notification-rules',
+    'Platform notification rules',
+    'safety',
+    'records',
+    'Current notification configurations, channels and current geofence coverage. Configuration is separate from sent evidence.',
+  ),
+  entry(
+    'push-audits-count',
+    'Rule-linked push audits',
+    'safety',
+    'metric',
+    'One record per recorded device push attempt linked to a notification rule. Account-wide. Not unique transitions, recipients or confirmed delivery.',
+  ),
+  entry(
+    'push-audits',
+    'Rule-linked push audit records',
+    'safety',
+    'records',
+    'Sanitised device-attempt audits: rule reference, time and recorded success flag. Event subtype and historical recipient attribution are unavailable.',
+  ),
+  entry(
+    'feed-evidence',
+    'HR / travel feed evidence',
+    'integrations',
+    'records',
+    'Account-wide receipt and processing evidence. Last credential use does not establish feed freshness. Expected intervals are local review assumptions.',
+  ),
+);
 export const defaultWidgets = [
   'enabled',
   'limit',

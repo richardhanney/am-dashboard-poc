@@ -165,7 +165,7 @@ export function Empty({ text = 'No recorded evidence in this period.' }: { text?
     <div className="empty-state">
       <InfoOutlinedIcon />
       <Typography>{text}</Typography>
-      <Typography variant="caption">Try another date range or fictional customer.</Typography>
+      <Typography variant="caption">Try another date range or customer.</Typography>
     </div>
   );
 }

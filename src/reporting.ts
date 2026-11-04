@@ -10,6 +10,7 @@ export type ExportScope = {
   asOf: string;
   snapshotId: string;
   definition?: string;
+  audience?: string;
 };
 export const ExportContext = createContext<ExportScope | null>(null);
 export function allocationStats(enabled: number, allocation: number | null) {
@@ -29,6 +30,7 @@ export const withExportScope = (rows: CsvRow[], scope: ExportScope): CsvRow[] =>
     'Metric definition':
       scope.definition ||
       'Recorded fictional evidence; no billing, delivery or installation inference',
+    'Audience scope': scope.audience || 'All users',
     Classification: 'FICTIONAL UX PROTOTYPE',
   }));
 export type ReportSnapshot = {

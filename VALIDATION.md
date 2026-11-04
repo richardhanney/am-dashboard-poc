@@ -1,42 +1,57 @@
 # Validation
 
-This is a fictional, browser-only dashboard. The visual design was informed by an existing internal application; no internal source paths, endpoints or implementation inventories are included here.
+This browser-only UX prototype contains fictional data. No product repository was modified and no customer database or service was queried. The public source contains sanitised projections and generic design notes, without internal source inventories or paths.
 
-## Commands
+## Local checks
 
 ```sh
-npm ci
 npm run lint
 npm test
 npm run build
 npm run preview
 ```
 
-Lint includes ESLint and Prettier. Build includes strict TypeScript checks and the Vite static build. Contract tests cover the three fabricated customers and all four date presets, daily engagement/creation/travel/send counts, request response rates, identity chronology, map receipts, journey origin filters, health thresholds, layout validation, booking creation and the retained simulation/reporting helpers.
+ESLint/Prettier, all **43 tests**, strict TypeScript and the Vite production build passed. Dependencies and lockfile were unchanged; no new libraries were needed.
 
-Local result: ESLint/Prettier passed, all **30 tests** passed, and strict TypeScript/Vite production build passed. Production-preview browser checks completed without console warnings or errors.
+Tests cover the three fabricated customers and all four date presets, current/period distinctions, daily engagement/creation/travel/send counts, check-in response math, identity chronology, country/map receipts, current group/role/tag membership, briefing/reminder relationships, nullable facility locations, geofence geometry, sanitised rule audit fields, feed ownership/time/completion boundaries, optional freshness assumptions, health policy states, independent customer layouts, CSV scope and retained simulation/report helpers.
 
-The dependency audit reports 11 moderate and one high advisory in development-only lint tooling (the ESLint/minimatch and lint-plugin/Zod chains). These dependencies are not bundled into the static site. Dependency remediation is separate from this interface update; no automatic or forced upgrades were applied.
+## Browser verification
 
-## Browser acceptance checks
+The development app and static production preview at the repository base path were inspected locally.
 
-- Initial General Overview; customer search, sorting and navigation.
-- Acme, Globex and Northstar; all five tabs and 1/3/6/12-month presets.
-- Health threshold edits, invalid input, reset, session retention and independence from reporting dates.
-- Overview card add/remove/reset, keyboard reorder and saved-layout reload.
-- Separate info/metric receipt controls; date/category chart receipts; search/sort/pagination and displayed-page CSV export.
-- Traveller footprint origin filters, journey visibility, clear country, timeline, risk views and reset.
-- Alerts map risk/category filters, density, clustering, mapped/unmapped evidence and receipts.
-- Narrow viewport layout, fictional branding, local confetti and help easter egg.
+- General Overview: unhealthy customer cards with reason and failing metric/value/threshold, search, no-match state and customer navigation. Manual override cards show the entered fictional reason and survive reload.
+- All five tabs; Acme, Globex and Northstar; the 1/3/6/12-month presets.
+- One mock-data notice fixed below the application header across every tab; verified after scrolling deep into the dashboard and at a 390px viewport. Content and sidebar offsets follow its wrapped height; repeated card/table/map/dialog disclaimers removed. Current/account-wide scope labels remain. CSV classification is retained and report classification is print-only.
+- Mobile metric definition; preserved commercial notice and recorded-send terminology.
+- Combined group/role/tag filters reduce user-linked evidence while current account totals stay account-wide. Clear restores the cohort; empty briefing results disable export.
+- Refresh metrics applies a coherent local receipt batch: Acme enabled accounts changed 1,084 → 1,085 and engaged users 612 → 613, with matching drill-down rows and CSV snapshot metadata. Other customers remained unchanged; portfolio refresh updated all accounts. Loading prevents duplicate requests; the existing side cannons run after completion, and the sidebar party button is removed. Development and production-preview console checks were clean.
+- Independent customer card selection survives customer changes and reload; reset restores defaults.
+- Briefing receipt links open the correct traveller and booking/journey.
+- SOS acknowledgement receipt opens a recorded-location map; no resolution inference.
+- Facility-based users reconcile with the current relationship. Missing coordinates disable map access. Circle/polygon coverage and rule-linked push audit receipts remain distinct from historical events.
+- Feed receipt/outcome evidence, unset freshness, optional cadence producing Late, failure state and account-wide receipts.
+- Browser downloads for briefing CSV (ten displayed rows) and HR receipt CSV (four rows), including customer/audience/definition metadata.
+- Overview report preview preserves selected card order and scope. Printing uses the browser's native Print / Save PDF dialog; an automated saved-PDF artifact was not produced.
+- Narrow 390px viewport: no document-level horizontal overflow on Overview, Integrations or General Overview. Wide tables scroll within their containers.
+- No console warnings or errors in the production-preview validation tab.
 
-The five reference screenshots are in `screenshots/`. They show fictional Acme data only.
+## Screenshots
 
-## Publication boundary
+Fresh Acme desktop captures:
 
-The intended repository contains only standalone prototype source, tests, documentation, lockfile, bundled public geography and fictional screenshots. No environment files, generated dist, node_modules, archives, local caches or session artifacts belong in source control.
+- `screenshots/refinement-overview.jpg`
+- `screenshots/refinement-users.jpg`
+- `screenshots/refinement-travel.jpg`
+- `screenshots/refinement-safety-alerts.jpg`
+- `screenshots/refinement-integrations.jpg`
 
-Public npm/GitHub links, public-domain geography attribution, SVG namespace URLs, loopback development URLs and GitHub's workflow permission names are harmless tooling metadata. No credentials, internal endpoints, customer records, production API clients or production application source are used. Company branding is replaced with fictional Serenity Local / HULA branding. No licence has been added.
+Additional captures show the unhealthy-customer cards and Overview report preview:
 
-## Intentional differences
+- `screenshots/requirements-general-overview.jpg`
+- `screenshots/requirements-overview-report.jpg`
 
-Data and branding are fictional, and all formerly connected data badges say Fictional data. Current account status remains labelled Enabled/Disabled and allocation remains Configured capacity; the commercial 365-day validation notice is retained. These labels avoid claiming a validated billing model. Authentication, feature flags, server errors and server-side pagination are replaced by local state, validation and paginated fictional records. Refresh retains the same mock snapshot. Earlier standalone Live/report-studio controls are not displayed in this reference-style page.
+Only these intended fictional screenshots are allowed through `.gitignore`. Generated builds, dependency folders, environment files, archives, local caches and session artifacts remain excluded.
+
+## Boundaries
+
+The automatic GitHub Pages workflow installs the lockfile dependencies, runs lint/tests/build and deploys the validated static output. Source-informed feasibility does not prove deployed schema, live evidence completeness, retention or permissions. See [feasibility boundaries](FEASIBILITY.md) for the remaining production work. Earlier standalone Live/report-studio controls remain outside the current page; manual refresh now updates session receipts locally and fires confetti after completion. A page reload restores the baseline.

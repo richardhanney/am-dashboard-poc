@@ -26,6 +26,8 @@ export default function DashboardRecords({
   onRow,
   toolbar = true,
   initialPageSize = 10,
+  accountWide = false,
+  definition,
 }: {
   title: string;
   rows: GridValidRowModel[];
@@ -33,6 +35,8 @@ export default function DashboardRecords({
   onRow?: (row: GridValidRowModel) => void;
   toolbar?: boolean;
   initialPageSize?: number;
+  accountWide?: boolean;
+  definition?: string;
 }) {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
@@ -72,7 +76,8 @@ export default function DashboardRecords({
     const result = scope
       ? withExportScope(data, {
           ...scope,
-          definition: `${title}. Displayed page only (${shown.length} rows).`,
+          audience: accountWide ? 'Account-wide (audience filters not applied)' : scope.audience,
+          definition: `${(definition || title).replace(/[.\s]+$/, '')}. Displayed page only (${shown.length} rows).`,
         })
       : data;
     downloadCsv(`HULA-${title}-MOCK`, result, [
@@ -184,7 +189,7 @@ export default function DashboardRecords({
       />
       {toolbar && (
         <Typography variant="caption" color="text.secondary">
-          Fictional records · CSV exports the displayed page only.
+          CSV exports the displayed page only.
         </Typography>
       )}
     </div>

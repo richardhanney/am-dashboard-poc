@@ -394,9 +394,8 @@ function makeCustomer(config: {
       traveller: trip.traveller,
       time: `${dateAt(ago)}T14:32:00`,
       location: trip.destination,
-      status: i === 0 ? 'Acknowledged' : 'Resolved',
-      acknowledgement:
-        i === 0 ? 'Mock assistance team acknowledged at 14:34' : 'Mock assistance case closed',
+      status: i % 3 === 0 ? 'Pending acknowledgement' : 'Acknowledged',
+      acknowledgement: i % 3 === 0 ? 'No acknowledgement recorded' : 'Assistance team acknowledged',
     };
   });
   const alerts: AlertRecord[] = Array.from({ length: config.alertCount * 8 }, (_, i) => {
@@ -407,7 +406,7 @@ function makeCustomer(config: {
       'Weather advisory',
       'Transport disruption',
       'Security update',
-      'Pre-travel briefing',
+      'Travel advisory',
     ];
     const recipients = Array.from(
       { length: 24 + ((i * 13) % (id === 'northstar' ? 45 : 100)) },
@@ -417,7 +416,7 @@ function makeCustomer(config: {
       id: `${id}-alert${i}`,
       alert: `${names[i % 4]} · ${trip.destination}`,
       risk: trip.risk,
-      type: ['Weather', 'Transport', 'Security', 'Travel briefing'][i % 4],
+      type: ['Weather', 'Transport', 'Security', 'Travel advisory'][i % 4],
       recipients,
       date: `${dateAt(ago)}T08:40:00`,
       location: trip.destination,
@@ -434,8 +433,8 @@ function makeCustomer(config: {
       lastUsed: id === 'northstar' ? null : `${dateAt(0)}T09:12:00`,
       detail:
         id === 'northstar'
-          ? 'SSO adoption opportunity. No mock SSO configuration.'
-          : 'SSO configured. Mock sign-in observed.',
+          ? 'SSO adoption opportunity. No SSO configuration.'
+          : 'SSO configured. Sign-in observed.',
     },
     {
       id: 'travelport',
@@ -443,7 +442,7 @@ function makeCustomer(config: {
       type: 'TMC',
       status: id === 'northstar' ? 'Not configured' : 'Active',
       lastUsed: id === 'northstar' ? null : `${dateAt(id === 'globex' ? 1 : 0)}T08:30:00`,
-      detail: 'Last observed mock travel feed. No live provider connection.',
+      detail: 'Last observed travel feed.',
     },
     {
       id: 'sap',
@@ -453,8 +452,8 @@ function makeCustomer(config: {
       lastUsed: `${dateAt(id === 'northstar' ? 12 : 0)}T07:00:00`,
       detail:
         id === 'northstar'
-          ? 'Mock HR credential last used 12 days ago. Review scheduled.'
-          : 'Mock HR credential last used at scheduled sync. No credentials are stored.',
+          ? 'HR credential last used 12 days ago. Review scheduled.'
+          : 'HR credential last used at scheduled sync. No credentials are stored.',
     },
     {
       id: 'concur',
@@ -462,7 +461,7 @@ function makeCustomer(config: {
       type: 'TMC',
       status: 'Active',
       lastUsed: `${dateAt(id === 'northstar' ? 2 : 0)}T10:10:00`,
-      detail: 'Mock itinerary feed observed. Journeys reconciled locally.',
+      detail: 'Itinerary feed observed.',
     },
     {
       id: 'amadeus',
@@ -470,7 +469,7 @@ function makeCustomer(config: {
       type: 'TMC',
       status: 'Warning',
       lastUsed: `${dateAt(id === 'northstar' ? 7 : 3)}T12:15:00`,
-      detail: 'Simulated feed delay. Review provider feed with the account team.',
+      detail: 'Feed delay. Review provider feed with the account team.',
     },
   ];
   // Give some profiles recent creation dates without moving their latest recorded
