@@ -82,6 +82,8 @@ import {
   type Widget,
 } from './dashboardModel';
 import CustomerHealth, { HealthControl } from './CustomerHealth';
+import { CustomerReview } from './CustomerReviews';
+import { normaliseReview, readReviews, reviewStorageKey, utcToday } from './reviews';
 import DashboardRecords from './DashboardRecords';
 import { ExportContext } from './reporting';
 import useConfetti from './useConfetti';
@@ -257,6 +259,17 @@ export default function App() {
   const [to, setTo] = useState<Date | null>(parseISO(range.to));
   const [preset, setPreset] = useState<number | null>(3);
   const [policies, setPolicies] = useState(readPolicies);
+  const [reviews, setReviews] = useState(readReviews);
+  const [reviewToday, setReviewToday] = useState(utcToday);
+  useEffect(() => {
+    const update = () => setReviewToday(utcToday());
+    const timer = window.setInterval(update, 60000);
+    window.addEventListener('focus', update);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', update);
+    };
+  }, []);
   const [cadences, setCadences] = useState(readCadences);
   const [audience, setAudience] = useState<Audience>(emptyAudience);
   const [layout, setLayout] = useState(() => readCustomerLayout('acme'));
@@ -269,6 +282,13 @@ export default function App() {
   const [catalogue, setCatalogue] = useState(false);
   const [detail, setDetail] = useState<Receipt | null>(null);
   const [toast, setToast] = useState('');
+  useEffect(() => {
+    try {
+      localStorage.setItem(reviewStorageKey, JSON.stringify(reviews));
+    } catch {
+      // Explicit edits report storage failures through saveLocal; initial examples stay session-local.
+    }
+  }, [reviews]);
   const [refreshing, setRefreshing] = useState(false);
 
   const [dragSize, setDragSize] = useState<{ width: number; height: number } | undefined>();
@@ -1456,6 +1476,8 @@ export default function App() {
                   <HealthControl
                     key={customerId}
                     customer={customer}
+                    review={reviews[customerId] || normaliseReview(null)}
+                    today={reviewToday}
                     policy={policies[customerId] || defaultPolicy()}
                     onChange={(value) => {
                       const next = { ...policies, [customerId]: value };
@@ -1524,6 +1546,19 @@ export default function App() {
               )}
             </div>
             {customerId && (
+              <CustomerReview
+                key={customerId}
+                customer={customer}
+                review={reviews[customerId] || normaliseReview(null)}
+                today={reviewToday}
+                onChange={(value) => {
+                  const next = { ...reviews, [customerId]: value };
+                  setReviews(next);
+                  saveLocal(reviewStorageKey, next);
+                }}
+              />
+            )}
+            {customerId && (
               <AudienceFilters
                 customer={customer}
                 value={audience}
@@ -1538,6 +1573,8 @@ export default function App() {
               <CustomerHealth
                 customers={customers}
                 policies={policies}
+                reviews={reviews}
+                today={reviewToday}
                 onSelect={choose}
                 onRefresh={refresh}
                 refreshing={refreshing}

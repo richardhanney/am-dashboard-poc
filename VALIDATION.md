@@ -11,7 +11,7 @@ npm run build
 npm run preview
 ```
 
-ESLint/Prettier, all **43 tests**, strict TypeScript and the Vite production build passed. Dependencies and lockfile were unchanged; no new libraries were needed.
+ESLint/Prettier, all **48 tests**, strict TypeScript and the Vite production build passed. Dependencies and lockfile were unchanged; no new libraries were needed.
 
 Tests cover the three fabricated customers and all four date presets, current/period distinctions, daily engagement/creation/travel/send counts, check-in response math, identity chronology, country/map receipts, current group/role/tag membership, briefing/reminder relationships, nullable facility locations, geofence geometry, sanitised rule audit fields, feed ownership/time/completion boundaries, optional freshness assumptions, health policy states, independent customer layouts, CSV scope and retained simulation/report helpers.
 
@@ -55,3 +55,9 @@ Only these intended fictional screenshots are allowed through `.gitignore`. Gene
 ## Boundaries
 
 The automatic GitHub Pages workflow installs the lockfile dependencies, runs lint/tests/build and deploys the validated static output. Source-informed feasibility does not prove deployed schema, live evidence completeness, retention or permissions. See [feasibility boundaries](FEASIBILITY.md) for the remaining production work. Earlier standalone Live/report-studio controls remain outside the current page; manual refresh now updates session receipts locally and fires confetti after completion. A page reload restores the baseline.
+
+## Account review planning validation
+
+Five additional tests cover month-end/leap-year recurrence, calendar-month workload counts, completion chronology, optional review-health rules and persisted-state validation. All 48 tests pass. Lint/formatting, strict TypeScript and the production build pass with no added dependencies.
+
+Browser checks covered customer-specific schedule edits, interval validation, clearing a schedule, future-date validation, review completion, suggested next dates, history and counts after reload. An overdue review made a customer unhealthy with only that check enabled; completion cleared that failure. Reporting presets and tab changes did not change review dates. Next-month filtering returned the matching customer. A 390px viewport had no document overflow. The static production preview at the repository base path also preserved completed reviews after reload; console checks were clean. Review schedules remain browser-local, with no shared backend, notifications or production persistence claim.

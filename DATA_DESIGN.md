@@ -29,3 +29,11 @@ The existing simulation helper supplies manual refresh batches. Earlier standalo
 ## Future implementation considerations
 
 Production reporting would require agreed definitions, tenant/customer authorisation, evidence completeness, timezone and retention policy, consistent export snapshots and separately validated commercial rules. Historical aggregates could use a scoped reporting store and cache; paginated receipts could load on demand. Conditional refresh must reconcile corrections, deletions, late-arriving events and moving date windows. These are design considerations, not capabilities of this static prototype.
+
+## Account review planning
+
+Per-customer next review date, whole-month interval (1–24) and completion history are local account-manager preferences under `hula-customer-reviews-v1`. Initial illustrative schedules show a customer due this month, another next month and another overdue; the starting dates are saved on first load. These are planning records, separate from the fixed usage snapshot and audience/reporting filters. UTC today updates on focus and at least once a minute while the page runs.
+
+Completing a review appends its date and agreed next review date, preserving earlier history. The suggested date is completion plus the interval, clamped to the last valid day for short months. Completion cannot be in the future or on/before the previous completion; the next date must be after today. Duplicate same-day completion is disabled. Editing the schedule does not acknowledge a review or erase history. Clearing the next date leaves the customer unscheduled.
+
+Portfolio counts separate overdue dates from today-through-month-end, then next calendar month; reviewed-this-month counts distinct customers with any completion this month. The optional overdue-review health check is disabled by default to preserve existing rules: a past due date fails, today/future passes, no date is Unknown. Other failing checks and manual overrides still apply after completion. Browser storage is not shared or backed up; no scheduler, notifications, production data model or backend persistence is implied.

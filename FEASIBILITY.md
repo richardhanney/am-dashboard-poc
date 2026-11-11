@@ -30,3 +30,7 @@ Check-in response rate uses completed requests divided by all requested records 
 ## What still needs production validation
 
 Authorised reporting endpoints, tenant/group visibility, event semantics, data retention, late corrections, pagination, time zones and consistent exports must be verified against the target runtime and database. Persisted preferences and a reporting cache are future implementation work. No production readiness or billing-grade accuracy is claimed by this static prototype.
+
+## Account review schedules
+
+Next review dates, review intervals and completion history are new local planning preferences in this prototype. The overdue-review health check is optional. This does not assert that equivalent production storage exists. A shared implementation would need an authorised customer-scoped persistence model, completion audit, update concurrency and clear account-manager ownership. No production repository, schema or service is changed here.

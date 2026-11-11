@@ -535,3 +535,85 @@
   padding-top: 3px;
   padding-bottom: 3px;
 }
+
+.customer-review-panel,
+.portfolio-reviews {
+  padding: 20px;
+  background: white;
+}
+.customer-review-panel,
+.review-schedule-summary,
+.review-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.customer-review-panel {
+  justify-content: space-between;
+}
+.review-schedule-summary {
+  flex: 1;
+  min-width: min(100%, 300px);
+}
+.review-actions {
+  margin-left: auto;
+}
+.portfolio-reviews,
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.review-form {
+  padding-top: 8px;
+}
+.review-counts {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+.review-count.MuiButtonBase-root {
+  border: 1px solid #deded8;
+  border-radius: 4px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+}
+.review-count[aria-pressed='true'] {
+  border-color: #0083b8;
+  background: #eef7fa;
+}
+.review-count:hover {
+  background: #f5f7fa;
+}
+.review-count:focus-visible {
+  outline: 2px solid #0083b8;
+  outline-offset: 2px;
+}
+.review-history {
+  padding-left: 20px;
+  max-height: 180px;
+  overflow: auto;
+  font-size: 13px;
+}
+@media (max-width: 950px) {
+  .review-counts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .review-counts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .review-actions {
+    margin-left: 0;
+  }
+  .customer-review-panel,
+  .portfolio-reviews {
+    padding: 16px;
+  }
+}

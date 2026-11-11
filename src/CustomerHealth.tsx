@@ -19,21 +19,27 @@ import type { Customer } from './data';
 import { validThreshold } from './dashboardModel';
 import { defaultPolicy, reviewHealth, type HealthPolicy } from './preferences';
 import DashboardRecords from './DashboardRecords';
+import { PortfolioReviews } from './CustomerReviews';
+import type { ReviewSchedule } from './reviews';
 const tone = (status: string) =>
   status === 'Healthy' ? 'success' : status === 'Unhealthy' ? 'warning' : 'default';
 export function HealthControl({
   customer,
   policy,
   onChange,
+  review,
+  today,
 }: {
   customer: Customer;
   policy: HealthPolicy;
+  review: ReviewSchedule;
+  today: string;
   onChange: (policy: HealthPolicy) => void;
 }) {
   const [open, setOpen] = useState(false),
     [draft, setDraft] = useState(policy),
     [threshold, setThreshold] = useState(String(policy.threshold));
-  const result = reviewHealth(customer, policy);
+  const result = reviewHealth(customer, policy, customer.limit, review, today);
   const valid =
     (!draft.engagement || validThreshold(threshold)) &&
     (!draft.manualUnhealthy || !!draft.reason.trim());
@@ -103,6 +109,19 @@ export function HealthControl({
               This is not a purchased-licence calculation.
             </Typography>
             <FormControlLabel
+              label="Flag overdue account reviews"
+              control={
+                <Checkbox
+                  checked={draft.overdueReview}
+                  onChange={(_, value) => setDraft({ ...draft, overdueReview: value })}
+                />
+              }
+            />
+            <Typography variant="caption">
+              Fails when the next review date is before today (UTC). Due today passes; an
+              unscheduled review is not assessable. Independent of reporting filters.
+            </Typography>
+            <FormControlLabel
               label="Manually mark this customer unhealthy"
               control={
                 <Checkbox
@@ -160,15 +179,21 @@ export default function CustomerHealth({
   onSelect,
   onRefresh,
   refreshing,
+  reviews,
+  today,
 }: {
   customers: Customer[];
+  reviews: Record<string, ReviewSchedule>;
+  today: string;
   refreshing: boolean;
   policies: Record<string, HealthPolicy>;
   onSelect: (id: string) => void;
   onRefresh: () => void;
 }) {
   const [search, setSearch] = useState('');
-  const rows = customers.map((c) => reviewHealth(c, policies[c.id] || defaultPolicy()));
+  const rows = customers.map((c) =>
+    reviewHealth(c, policies[c.id] || defaultPolicy(), c.limit, reviews[c.id], today),
+  );
   const unhealthy = rows.filter((r) => r.status === 'Unhealthy'),
     unknown = rows.filter((r) => r.status === 'Not assessable');
   const formatted = (values: typeof rows) =>
@@ -197,13 +222,14 @@ export default function CustomerHealth({
           {refreshing ? 'Refreshing…' : 'Refresh customer health'}
         </Button>
       </div>
+      <PortfolioReviews customers={customers} reviews={reviews} today={today} onSelect={onSelect} />
       <Typography>
         Customers requiring an account review. Health follows each customer's selected checks and
         manual override.
       </Typography>
       <Typography variant="caption" color="text.secondary">
-        Engagement window {rows[0].from} — {rows[0].to} UTC · current account capacity · independent
-        of reporting dates and audience filters
+        Engagement window {rows[0].from} — {rows[0].to} UTC · current account capacity · review
+        dates as of {today} UTC · independent of reporting dates and audience filters
       </Typography>
       <TextField
         size="small"
