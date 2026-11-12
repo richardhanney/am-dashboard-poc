@@ -11,7 +11,7 @@ npm run build
 npm run preview
 ```
 
-ESLint/Prettier, all **48 tests**, strict TypeScript and the Vite production build passed. Dependencies and lockfile were unchanged; no new libraries were needed.
+ESLint/Prettier, all **53 tests**, strict TypeScript and the Vite production build passed. Dependencies and lockfile were unchanged; no new libraries were needed.
 
 Tests cover the three fabricated customers and all four date presets, current/period distinctions, daily engagement/creation/travel/send counts, check-in response math, identity chronology, country/map receipts, current group/role/tag membership, briefing/reminder relationships, nullable facility locations, geofence geometry, sanitised rule audit fields, feed ownership/time/completion boundaries, optional freshness assumptions, health policy states, independent customer layouts, CSV scope and retained simulation/report helpers.
 
@@ -58,6 +58,12 @@ The automatic GitHub Pages workflow installs the lockfile dependencies, runs lin
 
 ## Account review planning validation
 
-Five additional tests cover month-end/leap-year recurrence, calendar-month workload counts, completion chronology, optional review-health rules and persisted-state validation. All 48 tests pass. Lint/formatting, strict TypeScript and the production build pass with no added dependencies.
+Five additional tests cover month-end/leap-year recurrence, calendar-month workload counts, completion chronology, optional review-health rules and persisted-state validation. All 53 tests pass. Lint/formatting, strict TypeScript and the production build pass with no added dependencies.
 
 Browser checks covered customer-specific schedule edits, interval validation, clearing a schedule, future-date validation, review completion, suggested next dates, history and counts after reload. An overdue review made a customer unhealthy with only that check enabled; completion cleared that failure. Reporting presets and tab changes did not change review dates. Next-month filtering returned the matching customer. A 390px viewport had no document overflow. The static production preview at the repository base path also preserved completed reviews after reload; console checks were clean. Review schedules remain browser-local, with no shared backend, notifications or production persistence claim.
+
+## Nearby-alert map refinement
+
+Additional tests verify distinct-alert partitioning and receipt conservation for all customers/date presets, invalid-coordinate exclusion, geographic cluster centres and translation-invariant clustering. The canvas is a Leaflet geographic layer in the same moving parent pane as markers, with padded drawing, animation-frame redraws during movement, retina sizing and cancellation on removal. Marker clusters rebuild on zoom rather than every pan. The heat surface adds a compact quartic kernel for each distinct mapped alert before applying a green/yellow/red colour lookup. Overlapping activity creates hotter connected areas. Risk remains a separate filter and receipt field; heat does not assert a risk score. All filtered points, including off-screen points, contribute to the stable normalisation reference, so panning does not recolour the view. Neutral count bubbles are optional and off by default; their toggle does not refit the map. Extra tests verify additive overlap, raster samples, transparent zero density and translation-invariant scale. Risk-summary tests still cover the supporting location list.
+
+Chrome checks covered map dragging, zoom, reset-to-fit, mapped-location and unmapped-record drill-downs, empty filters, customer/date changes and a 390px layout without document overflow. No new libraries, external map tiles, APIs or production data were added.
