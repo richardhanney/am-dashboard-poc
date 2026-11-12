@@ -1397,7 +1397,7 @@ export default function App() {
               onClick={() =>
                 setDetail({
                   title: 'Metric definitions',
-                  definition: 'Current status, period engagement and billing are distinct.',
+                  definition: 'How account status, engagement and usage metrics are calculated.',
                   content: (
                     <div className="metric-definitions">
                       {dashboardWidgets
@@ -1602,9 +1602,6 @@ export default function App() {
                 </Tabs>
                 {valid && (
                   <>
-                    <Alert severity="info" className="commercial-notice">
-                      Commercial 365-day active-user definition to be validated separately.
-                    </Alert>
                     {tab === 0 && (
                       <div className="catalogue-toolbar">
                         <Button variant="contained" onClick={() => setCatalogue(true)}>

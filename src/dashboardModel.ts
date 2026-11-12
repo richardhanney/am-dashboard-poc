@@ -29,10 +29,8 @@ const entry = (
   width: Widget['width'] = kind === 'metric' ? 'small' : kind === 'records' ? 'full' : 'wide',
   current = false,
 ): Widget => ({ id, title, tab, kind, width, definition, current });
-const current =
-  'Current enabled-account snapshot, independent of reporting dates. This is not a commercial active-user or billing measure.';
-const capacity =
-  'Illustrative configured capacity. This is not a purchased licence count or an invoicing calculation.';
+const current = 'Current enabled-account snapshot, independent of reporting dates.';
+const capacity = 'Current configured user limit for this customer.';
 const period = 'Records in the selected inclusive UTC reporting period.';
 export const dashboardWidgets: Widget[] = [
   entry(
@@ -49,7 +47,7 @@ export const dashboardWidgets: Widget[] = [
     'Disabled accounts',
     'users',
     'metric',
-    'Current disabled-account snapshot. Disabled status is not commercial inactivity.',
+    'Current disabled-account snapshot, independent of reporting dates.',
     'small',
     true,
   ),
@@ -68,7 +66,7 @@ export const dashboardWidgets: Widget[] = [
     'Remaining capacity',
     'users',
     'metric',
-    'Configured limit minus enabled accounts, floored at zero. Over-allocation is shown separately. Illustrative only.',
+    'Configured limit minus enabled accounts, floored at zero. Over-allocation is shown separately.',
     'small',
     true,
   ),
@@ -77,7 +75,7 @@ export const dashboardWidgets: Widget[] = [
     'Configured overage',
     'users',
     'metric',
-    'Enabled accounts above the configured limit, or zero. No billing implication.',
+    'Enabled accounts above the configured limit, or zero.',
     'small',
     true,
   ),
@@ -93,7 +91,7 @@ export const dashboardWidgets: Widget[] = [
     'Recorded engagement',
     'users',
     'metric',
-    'Distinct users with recorded web or mobile activity during the selected period. Not a billing-grade metric.',
+    'Distinct users with recorded web or mobile activity during the selected period.',
   ),
   entry(
     'mobile',
@@ -164,7 +162,7 @@ export const dashboardWidgets: Widget[] = [
     'Observed engagement age',
     'users',
     'chart',
-    'Latest recorded web/mobile activity as of the selected To date. No recorded evidence does not establish commercial inactivity.',
+    'Time since the latest recorded web/mobile activity as of the selected To date. Users without recorded activity are grouped as No recorded evidence.',
   ),
   entry('users-records', 'User engagement records', 'users', 'records', period),
   entry(
@@ -317,7 +315,7 @@ export const dashboardWidgets: Widget[] = [
       `${type} integration`,
       'integrations',
       'integration',
-      'Provider configuration; no operational health claim.',
+      'Current provider configuration and last observed use.',
     ),
   ),
   entry(
@@ -325,7 +323,7 @@ export const dashboardWidgets: Widget[] = [
     'Account review notes',
     'users',
     'notes',
-    'Illustrative prompts for an account review; no billing conclusion.',
+    'Suggested topics for the next account review.',
     'wide',
   ),
 ];
@@ -365,7 +363,7 @@ dashboardWidgets.push(
     'Facilities',
     'safety',
     'records',
-    'Current customer facilities, optional map position and based users. Account-wide; no historical facility-state reconstruction.',
+    'Current customer facilities, optional map position and based users. Account-wide; independent of reporting dates.',
   ),
   entry(
     'geofences-count',
@@ -402,7 +400,7 @@ dashboardWidgets.push(
     'Rule-linked push audit records',
     'safety',
     'records',
-    'Sanitised device-attempt audits: rule reference, time and recorded success flag. Event subtype and historical recipient attribution are unavailable.',
+    'Recorded device push attempts, with notification rule reference, time and recorded outcome.',
   ),
   entry(
     'feed-evidence',

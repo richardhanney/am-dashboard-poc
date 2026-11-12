@@ -453,7 +453,7 @@ function makeCustomer(config: {
       detail:
         id === 'northstar'
           ? 'HR credential last used 12 days ago. Review scheduled.'
-          : 'HR credential last used at scheduled sync. No credentials are stored.',
+          : 'HR credential last used at scheduled sync.',
     },
     {
       id: 'concur',

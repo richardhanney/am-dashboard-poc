@@ -152,8 +152,7 @@ export default function FeedEvidence({
       </TableContainer>
       <Typography variant="caption">
         No expected interval means freshness is not assessed. Processing failures are shown
-        independently. Unattributed travel receipts are excluded from customer summaries. No error
-        payloads, storage paths or credentials are exposed.
+        independently. Unattributed travel receipts are excluded from customer summaries.
       </Typography>
     </div>
   );

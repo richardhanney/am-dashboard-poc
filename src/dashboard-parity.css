@@ -119,9 +119,6 @@
   min-height: 48px;
   padding: 12px 20px;
 }
-.commercial-notice {
-  margin: 0;
-}
 .catalogue-toolbar {
   display: flex;
   flex-wrap: wrap;

@@ -73,8 +73,7 @@ export function HealthControl({
         <DialogContent>
           <div className="health-rule-form">
             <Alert severity="info">
-              Local account-review preferences. Any failed enabled check makes the account
-              unhealthy. Missing evidence is not a pass. These rules are separate from billing.
+              Any failed enabled check makes the account unhealthy. Missing evidence is not a pass.
             </Alert>
             <FormControlLabel
               label="Check recorded user engagement"
@@ -106,7 +105,6 @@ export function HealthControl({
             />
             <Typography variant="caption">
               Fails when the current enabled-account count exceeds the configured customer limit.
-              This is not a purchased-licence calculation.
             </Typography>
             <FormControlLabel
               label="Flag overdue account reviews"

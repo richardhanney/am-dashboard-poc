@@ -63,9 +63,6 @@ export default function OverviewReport({
               previews contain the first 10 rows; local card searches, map selections and pagination
               are not included.
             </Alert>
-            <Typography variant="caption" component="p" sx={{ mb: 2 }}>
-              Commercial 365-day active-user definition to be validated separately.
-            </Typography>
             <div className="overview-report-cards">
               {capture.cards.map((card) => (
                 <Paper
